@@ -1,0 +1,65 @@
+#httprequester-window {
+   min-width: 450px;
+   width: 1024px;
+   height: 768px;
+   overflow: auto;
+}
+
+#httprequesterSidebar {
+   overflow: scroll;
+}
+
+#sidebar {
+   max-width: none !important;
+}
+
+page,window,dialog {
+   font-size: 80%;
+   font-family: Arial, Helvetica, Sans-Serif;
+}
+
+row {
+   -moz-box-align: center;
+}
+
+
+p.label { 
+   margin: 0pt;
+   padding: 2pt;
+   font-weight: bold;
+}
+
+div.drop-area { 
+   margin: 2pt; 
+   border: 1pt solid gray;
+   min-height: 30px; min-width: 200px;
+}
+
+#response {
+   min-width: 500px;
+   min-height: 500px;
+}
+
+#response #content {
+   font-family: monospace;
+   font-size: 110%;
+   min-width: 400px;
+   min-height: 300px;
+}
+
+.small-buttons button {
+   padding: 0pt;
+   font-size: 75%;
+   margin: 0.05em;
+}
+
+#about {
+   min-height: 250px;
+   min-width: 300px;
+   width: 300px;
+}
+
+#response #title {
+   padding: 0.2em;
+   padding-left: 0.5em;
+}

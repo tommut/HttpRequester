@@ -1,0 +1,29 @@
+
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://httprequester/skin/default.css" type="text/css"?>
+<page id="about" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        title="HttpRequester"
+        xmlns:h="http://www.w3.org/1999/xhtml">
+<description class="header">HttpRequester</description>
+<groupbox>
+   <caption label="Creator"/>
+   <description>
+      Tom Mutdosch
+   </description>
+</groupbox>
+<groupbox>
+   <caption label="Contributor"/>
+   <description>
+      Alex Milowski is the creator of the excellent Poster addon, which is the basis for HttpRequester.
+   </description>
+</groupbox>
+  
+   <spacer flex="2"/>
+
+   <hbox>
+      <spacer flex="1"/>
+      <button label="Close" oncommand="window.close();"/>
+      <spacer flex="1"/>
+   </hbox>
+</page>
+

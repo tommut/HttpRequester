@@ -1,0 +1,7 @@
+content	httprequester	content/
+overlay	chrome://browser/content/browser.xul	chrome://httprequester/content/overlay.xul
+
+locale	httprequester	en-US	locale/en-US/
+
+skin	httprequester	classic/1.0	skin/
+style	chrome://global/content/customizeToolbar.xul	chrome://httprequester/skin/overlay.css
