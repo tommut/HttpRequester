@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://httprequester/skin/overlay.css" type="text/css"?>
+<overlay id="httprequester-overlay"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script src="overlay.js"/>
+
+  <keyset id="mainKeyset">
+    <key id="key_openHttpRequester" command="httprequester:open"
+         key="P"
+         modifiers="accel,alt" />
+  </keyset>
+
+  <commandset id="mainCommandSet">
+     <command id="httprequester:open" oncommand="httprequester.showHttpRequester();"/>
+  </commandset>
+
+  <menupopup id="menu_ToolsPopup">
+      <menuitem label="HttpRequester" key="key_openHttpRequester" accesskey="h" command="httprequester:open"/>
+  </menupopup>
+
+  <statusbar id="status-bar">
+    <statusbarpanel id="httprequester-status-bar" class="httprequester-status-bar"
+                    context="httprequester-status-manage"
+                    onmousedown=";">
+      <toolbarbutton image="chrome://httprequester/skin/httprequester16x16.png" tooltiptext="Open HttpRequester" oncommand="httprequester.showHttpRequester();"/>
+    </statusbarpanel>
+  </statusbar>
+
+</overlay>

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://httprequester/skin/default.css" type="text/css"?>
+<window id="googleLogin" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" 
+        title="Google Login"
+        xmlns:h="http://www.w3.org/1999/xhtml" flex="1" onload="GoogleLogin.init(window.arguments[0])">
+   <script type="application/x-javascript" src="chrome://httprequester/content/GoogleLogin.js"/>
+   <script type="application/x-javascript" src="chrome://httprequester/content/HTTP.js"/>
+   <label id="failure" flex="2" value=""/>
+   <grid flex="2">
+      <columns>
+         <column/>
+         <column flex="1"/>
+      </columns>
+      <rows>
+         <row>
+            <label value="User Auth:"/>
+            <hbox flex="1">
+               <textbox id='username' flex="1"/><textbox id='password' type='password' flex="1"/>
+            </hbox>
+         </row>
+         <row>
+            <label value="Service:"/>
+            <hbox flex="1">
+               <textbox id='service' flex="1"/>
+            </hbox>
+         </row>
+      </rows>
+   </grid>
+   <hbox>
+      <spacer flex="1"/>
+      <button label="Authenticate" oncommand="GoogleLogin.authenticate();"/>
+      <button label="Close" oncommand="GoogleLogin.cancel();window.close();"/>
+      <spacer flex="1"/>
+   </hbox>
+
+</window>

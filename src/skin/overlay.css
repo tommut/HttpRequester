@@ -1,0 +1,10 @@
+/* This is just an example. You shouldn't do this. */
+#httprequester-status-bar {
+   padding: 0px;
+   margin: 0px;
+}
+
+#httprequester-status-bar toolbarbutton {
+   padding: 0px;
+   margin: 0px;
+}

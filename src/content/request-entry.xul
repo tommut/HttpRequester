@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://httprequester/skin/default.css" type="text/css"?>
+<window id="request-entry-window" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" 
+   title="HttpRequester" persist="width height"  width="800px" height="640px"
+   xmlns:h="http://www.w3.org/1999/xhtml" flex="1" 
+   windowtype="window:httprequester-request"
+   onload="RequestEntry.loadRequest();">
+
+   <script type="application/x-javascript" src="chrome://httprequester/content/httprequester.js"/>
+   <script type="application/x-javascript" src="chrome://httprequester/content/request-entry.js"/>
+   	<keyset id="httprequesterKeys">
+		<key keycode="VK_ESCAPE" oncommand="window.close();"/>
+		<key id="key_find" key="f" oncommand="RequestEntry.findInTextBox();" modifiers="accel" />
+		<key id="key_find_next" key="g" oncommand="RequestEntry.doFindNext();" modifiers="accel"/>
+	</keyset>
+	
+   <vbox flex="3">
+   	
+	 <textbox id="content" multiline="true" flex="2"/>
+	 <spacer/>
+      <hbox class="small-buttons">
+       	  <button label="Find..." key="key_find" tooltiptext="Find text" oncommand="RequestEntry.findInTextBox();"/>
+	      <button label="Paste from clipboard" tooltiptext="Paste Request" oncommand="RequestEntry.pasteFromClipboard();"/>
+		  <spacer flex="5"/>
+	      <button label="Cancel"  oncommand="window.close();"/>
+		  <button label="Execute" tooltiptext="Execute the HTTP Request" oncommand="RequestEntry.doRequest();"/>
+      </hbox>
+
+ </vbox>
+
+
+</window>
