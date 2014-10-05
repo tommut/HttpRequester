@@ -1,9 +1,13 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://httprequester/skin/overlay.css" type="text/css"?>
 <overlay id="httprequester-overlay"
-         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"  onload="httprequester.initialize">
   <script src="overlay.js"/>
-
+  
+  <script type="application/x-javascript">
+		window.addEventListener("load", httprequester.initialize, false);		
+  </script>
+-
   <keyset id="mainKeyset">
     <key id="key_openHttpRequester" command="httprequester:open"
          key="P"
@@ -17,13 +21,23 @@
   <menupopup id="menu_ToolsPopup">
       <menuitem label="HttpRequester" key="key_openHttpRequester" accesskey="h" command="httprequester:open"/>
   </menupopup>
+  
+  <!-- toolbar button -->
+  <toolbarpalette id="BrowserToolbarPalette">
+  		<toolbarbutton id="http-requester-button"/>
+  </toolbarpalette>
 
+  <toolbarbutton id="http-requester-button" image="chrome://httprequester/skin/httprequester16x16.png" tooltiptext="Open HttpRequester" 
+       class="toolbarbutton-1 chromeclass-toolbar-additional" 
+       oncommand="httprequester.showHttpRequester();"/>
+  
+  <!-- legacy addons-bar button 
   <statusbar id="status-bar">
     <statusbarpanel id="httprequester-status-bar" class="httprequester-status-bar"
-                    context="httprequester-status-manage"
-                    onmousedown=";">
+                    context="httprequester-status-manage" onmousedown=";">
       <toolbarbutton image="chrome://httprequester/skin/httprequester16x16.png" tooltiptext="Open HttpRequester" oncommand="httprequester.showHttpRequester();"/>
     </statusbarpanel>
   </statusbar>
+  -->
 
 </overlay>

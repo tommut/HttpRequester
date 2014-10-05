@@ -3,585 +3,585 @@ var XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 var mimeService = Components.classes["@mozilla.org/mime;1"].getService(Components.interfaces.nsIMIMEService);
 
 var App = {
-   inprogress : null,
-   synopsis: null,
-   elements: {},
-   transactions: new Array(),
-   lastService: null,
-   urlHistory : {},
-   contentTypeHistory : {},
-   headerNameHistory : {},
-   customReadHttpMethods: {},
-   customWriteHttpMethdods: {},
-    
-    Transaction : function(){
-		this.timeStamp = null;
-		this.requestTransaction = null;
-		this.responseTransaction = null;
-	},
-   
-   RequestTransaction : function(){
-		this.httpMethod			= null;
-		this.url			= null;
-		this.requestHeaders = {},
-		this.contentType		= null;
-		this.content 	= null;
-		this.parameters = {}
-		this.filename		= null;
-		this.username			= null;
-		this.password	= null;
-		this.timeout    = null;
-		this.base64    = null;
+    inprogress: null,
+    synopsis: null,
+    elements: {},
+    transactions: new Array(),
+    lastService: null,
+    urlHistory: {},
+    contentTypeHistory: {},
+    headerNameHistory: {},
+    customReadHttpMethods: {},
+    customWriteHttpMethdods: {},
+
+    Transaction: function () {
+        this.timeStamp = null;
+        this.requestTransaction = null;
+        this.responseTransaction = null;
     },
-	ResponseTransaction : function() { 
-		this.title			= null;
-		this.status			= null;
-		this.statusText			= null;
-		this.content		= null;
-		this.responseHeaders = null;
-		this.responseTimeStamp = null;
-	},
-   
-   getPreferenceString: function(name){
-      var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
-      if (preferencesService) {
-         try {
-            return preferencesService.getCharPref(name);
-         } catch (ex) {
-            // no preference
-         }
-      }
-      return null;
-   },
-   getPreferenceComplex: function(name){
-      var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
-      if (preferencesService) {
-         try {
-            return preferencesService.getComplexValue(name, Components.interfaces.nsISupportsString).data;
-         } catch (ex) {
-            // no preference
-         }
-      }
-      return null;
-   },
-   setPreferenceComplex: function(name, value){
-      var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].
-	  	getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
-      if (preferencesService) {
-         try {
-		 	var sString = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
-		    sString.data = value;
-		    preferencesService.setComplexValue(name,Components.interfaces.nsISupportsString,sString);
-         } catch (ex) {
-            // no preference
-         }
-      }
-   },
-     getPreferenceInt: function(name){
-      var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
-      if (preferencesService) {
-         try {
-            return preferencesService.getIntPref(name);
-         } catch (ex) {
-            // no preference
-         }
-      }
-      return null;
-   },
-    getPreferenceBool: function(name){
-      var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
-      if (preferencesService) {
-         try {
-            return preferencesService.getBoolPref(name);
-         } catch (ex) {
-            // no preference
-         }
-      }
-      return null;
-   },
 
-   setPreferenceString: function(name,value){
-      var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
-      if (preferencesService) {
-         preferencesService.setCharPref(name,value);
-      }
-   },
-   getMaxHistory: function() { 
-  	var max = this.getPreferenceInt("maxhistory")
-	if ( max == null ) { 
-		max = 25;
-	}
-	return max;   
-   },
-   
-   getMaxUrlHistory: function() { 
-  	var max = this.getPreferenceInt("url.maxhistory")
-	if ( max == null ) { 
-		max = 10;
-	}
-	return max;   
-   },
-   getMaxContentTypeHistory: function() { 
-  	var max = this.getPreferenceInt("contenttype.maxhistory")
-	if ( max == null ) { 
-		max = 10;
-	}
-	return max;   
-   },
-   getMaxHeaderHistory: function() { 
-  	var max = this.getPreferenceInt("header.maxhistory")
-	if ( max == null ) { 
-		max = 10;
-	}
-	return max;   
-   },
-   	findInTextBox : function() { 
-   		// if the response-content is focused, we will perform a Find for the response content
-   		if ( document.getElementById("response-content").getAttribute("focused") ) { 
-			var nsIPromptService = Components.interfaces.nsIPromptService;
-			var nsPrompt_CONTRACTID = "@mozilla.org/embedcomp/prompt-service;1";
-			var gPromptService = Components.classes[nsPrompt_CONTRACTID].getService(nsIPromptService);
-			var result = { value: this.lastSearchString };
-			var dummy = { value: 0 };
-		
-			if (gPromptService.prompt(window,
-	                            "Find text in response",
-	                            "Enter text to search for:",
-	                            result,
-	                            null,
-	                            dummy)) {
-	        	this.lastSearchString = result.value;   
-	        	
-	        	this.doFindNext();
-			}  
-   		}
-	},
-	doFindNext : function() {
-		// if the response-content is focused, we will perform a Find for the response content
-   		if ( document.getElementById("response-content").getAttribute("focused") ) { 
-			var text = document.getElementById("response-content").value;
-	        	
-	    	var start = document.getElementById("response-content").selectionStart;
-	    	
-	    	if ( start < text.length - 1 ) {
-	    		start = start + 1;
-	    	}
-	    	var index = text.toUpperCase().indexOf( this.lastSearchString.toUpperCase(), start );
-	    	if ( index == -1 ) { 
-	    		// restart; look from the beginning 
-	    		index = text.toUpperCase().indexOf( this.lastSearchString.toUpperCase() );
-	    	}
-	    	if ( index == -1 ) { 
-	    		alert( "No match found.");
-	    	}
-	    	else { 
-	    		document.getElementById("response-content").select();
-				document.getElementById("response-content").setSelectionRange(index, (index + this.lastSearchString.length));
-	    	}
-   		}
-		
-	},
-   
-   init: function() {
-	// show advanced section if preference is set
-	if ( this.getPreferenceBool( "showAdvancedOptions" ) ) { 
-		document.getElementById("advancedSettings1").setAttribute( "hidden", false );
-		document.getElementById("advancedSettings2").setAttribute( "hidden", false );
-		document.getElementById("advancedSettings3").setAttribute( "hidden", false );
-	}
-	  // There was a component that handled storing some values; this no longer works 
-	  // in Firefox 4, so was removed.  The values are instead stored to the preferences.
-	  var httprequesterService = new Object();
-      //alert("Initializing with "+httprequesterService);
-      //if (!httprequesterService.contentType) {
-        httprequesterService.contentType = this.getPreferenceString("contentType");
-      //}
-      //if (!httprequesterService.contentType) {
-         httprequesterService.contentType = "text/xml";
-      //}
-      //if (!httprequesterService.url) {
-         httprequesterService.url = this.getPreferenceString("url");
-      //}
-      httprequesterService.file = "";
-      
-      this.elements["filename"] = document.getElementById("filename");
-      this.elements["contentType"] = document.getElementById("ctype");
-      this.elements["username"] = document.getElementById("username");
-      this.elements["password"] = document.getElementById("password");
-      this.elements["content"] = document.getElementById("content");
-      this.elements["url"] = document.getElementById("url");
-      this.elements["timeout-slider"] = document.getElementById("timeout-slider");
-      this.elements["timeout"] = document.getElementById("timeout");
-      
-      this.elements["filename"].value = httprequesterService.file;
-      this.elements["contentType"].value = httprequesterService.contentType;
-      this.elements["url"].value = httprequesterService.url;
-      if (httprequesterService.username) {
-         this.elements["username"].value = httprequesterService.username;
-      }
-      if (httprequesterService.password) {
-         this.elements["password"].value = httprequesterService.password;
-      }
-      var current = this;
-      this.elements["timeout-slider"].onchange = function() {
-         current.elements["timeout"].value = current.elements["timeout-slider"].value;
-      }
-      document.getElementById("base64-encode").onclick = function() {
-         var value = current.elements["content"].value;
-         if (value.length>0) {
-            var encoder = new Base64();
-            current.elements["content"].value = encoder.encode(value);
-         }
-      }
-      document.getElementById("header-list").onkeypress = function(event) {
-         if (event.keyCode==8 || event.keyCode==46){
-            current.onDeleteHeader();
-         }
-      };
-      document.getElementById("parameter-list").onkeypress = function(event) {
-         if (event.keyCode==8 || event.keyCode==46){
-            current.onDeleteParameter();
-         }
-      };
-	  document.getElementById("transaction-list").onkeypress = function(event) {
-         if (event.keyCode==8 || event.keyCode==46){
-            current.onDeleteTransaction();
-         }
-      };
-      document.getElementById("transaction-list").ondblclick = function(event) {
-            current.viewRawRequest();
-      };
-	  
-	  
-	  // load history
-	  //pref("extensions.httprequester.history", 25);
-	   var history = this.getPreferenceComplex("history");
-	   if (history != null && history.length > 0) {
-	  	 this.transactions = JSON.parse(history);
-		 
-		 for (var i = this.transactions.length-1; i>=0; i--) {
-		 	this.addTransactionToList(this.transactions[i]);
-		 }
-	   }
-	   
-	   // load urls
-	   var urlHistory = this.getPreferenceComplex("url.history");
-	   if (urlHistory != null && urlHistory.length > 0) {
-	  	 	this.urlHistory = JSON.parse(urlHistory);
-		}
-		else {
-			this.urlHistory = new Array();
-		}
-		this.updateMenuList( "url", this.urlHistory );
-		
-	   // load content type history
-	   var contentTypeHistory = this.getPreferenceComplex("contentType.history");
-	   if (contentTypeHistory != null && contentTypeHistory.length > 0) {
-	  	 this.contentTypeHistory = JSON.parse(contentTypeHistory);
-		}
-		else {
-			this.contentTypeHistory = new Array();
-		}
-		this.updateMenuList( "ctype", this.contentTypeHistory );
-		
-		// load headers
-	   var headerHistory = this.getPreferenceComplex("header.history");
-	   if (headerHistory != null && headerHistory.length > 0) {
-	  	 this.headerNameHistory = JSON.parse(headerHistory);
-		}
-		else {
-			this.headerNameHistory = new Array();
-		}
-		this.updateMenuList( "header-name", this.headerNameHistory );
-		
-		// set appropriate content UI controls based on radio button
-		this.contentBodyRadioButtonChanged();
-		
-		// load custom methods
-  		var sendCommands = this.getPreferenceString("http.methods.custom.write");
-	    if (sendCommands != null && sendCommands.length > 0) {
-	  	 	this.customWriteHttpMethods = JSON.parse(sendCommands);
-		}
-		else {
-			this.customWriteHttpMethods = new Array();
-		}
-  		var readCommands = this.getPreferenceString("http.methods.custom.read");
-	    if (readCommands != null && readCommands.length > 0) {
-	  	 	this.customReadHttpMethods = JSON.parse(readCommands);
-		}
-		else {
-			this.customReadHttpMethods = new Array();
-		}
-		
-		// populate METHOD dropdown with custom methods
-		var methodList = document.getElementById("method");
-		for (var i = 0; i < this.customWriteHttpMethods.length; i++) {
-			var newMethod = document.createElement("menuitem");
-			newMethod.setAttribute("label", this.customWriteHttpMethods[i]);
-			newMethod.setAttribute("value", this.customWriteHttpMethods[i]);
-			methodList.firstChild.appendChild(newMethod);
-		}
-		for (var i = 0; i < this.customReadHttpMethods.length; i++) {
-			var newMethod = document.createElement("menuitem");
-			newMethod.setAttribute("label", this.customReadHttpMethods[i]);
-			newMethod.setAttribute("value", this.customReadHttpMethods[i]);
-			methodList.firstChild.appendChild(newMethod);
-		}
-   },
-   saveSettings: function() { 
-  	 var historyString = JSON.stringify(this.transactions);
-   	 this.setPreferenceComplex( "history", historyString );
-	 
-	 var urlhistoryString = JSON.stringify(this.urlHistory);
-   	 this.setPreferenceComplex( "url.history", urlhistoryString );
-	 
-	 var contentTypehistoryString = JSON.stringify(this.contentTypeHistory);
-   	 this.setPreferenceComplex( "contentType.history", contentTypehistoryString );
-	 
-	 var headerHistoryString = JSON.stringify(this.headerNameHistory);
-   	 this.setPreferenceComplex( "header.history", headerHistoryString);
-   },
-   
-   saveValues: function() {
-   	
-   	
-   	this.setPreferenceString("file",this.elements["filename"].value);
-   	this.setPreferenceString("contentType",this.elements["contentType"].value);
-   	this.setPreferenceString("url",this.elements["url"].value);
-   	this.setPreferenceString("username",this.elements["username"].value);
-   	this.setPreferenceString("password",this.elements["password"].value);
-   },
-   
-   importValues: function() {
-      this.elements["filename"].value =  this.getPreferenceString("file");
-      this.elements["contentType"].value =this.getPreferenceString("contentType");
-      this.elements["url"].value = this.getPreferenceString("url");
-      this.elements["username"].value = this.getPreferenceString("username");
-      this.elements["password"].value = this.getPreferenceString("password");
-   },
-   
-   savePreferences: function() {
-      this.setPreferenceString("contentType",this.elements["contentType"].value);
-      this.setPreferenceString("url",this.elements["url"].value);
-   },
-   
-/*
- * Open a "browse for folder" dialog to locate an extension directory
- * Add the the selected directory to the dropdown list and set it as
- * the current working directory.
- */
-   browseForFile: function() {
-      var nsIFilePicker = Components.interfaces.nsIFilePicker;
-      var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
-      fp.init(window, "Choose File to Upload", nsIFilePicker.modeOpen);
-      if(fp.show() == nsIFilePicker.returnOK) {
-         var filenm = this.elements["filename"];
-         var item = filenm.value = fp.file.path;
-         //httprequesterService.file = fp.file.path;
-         try {
-            this.elements["contentType"].value = mimeService.getTypeFromFile(fp.file);
-         } catch (ex) {
-            this.elements["contentType"].value = "application/binary";
-         }
-      }
-   },
-   showGoogleLogin: function() {
-      var currentApp = this;
-      var data = {
-         username: this.elements["username"].value,
-         password: this.elements["password"].value,
-         service: currentApp.lastService,
-         auth: null
-      };
-      window.openDialog(
-         'chrome://httprequester/content/google-login.xul','google-login','modal,centerscreen,chrome,resizable',
-         data
-      );
-      if (data.success) {
-         this.googleAuth = data.auth;
-         //this.requestHeaders["authorization"] = "GoogleLogin auth="+this.googleAuth;
-		 this.addRequestHeader(authorization,"GoogleLogin auth="+this.googleAuth);
-         document.getElementById('google-login').setAttribute("label","Google Auth'd");
-      }
-      this.servive = data.service;
-   },
-   
-   
-   doMethodRequest: function() {
-      var method = document.getElementById("method").value;
-      if (method=="GET") {
-         this.getURL();
-      } else if (method=="POST") {
-         this.postURL();
-      } else if (method=="PUT") {
-         this.putURL();
-      } else if (method=="DELETE") {
-         this.deleteURL();
-      } else if (method=="HEAD") {
-         this.headURL();
-      } else if (method=="OPTIONS") {
-         this.optionsURL();
-      }
-      else {
-      	// custom methods
-      	for (var i = 0; i < this.customWriteHttpMethods.length; i++) {
-			if (method == this.customWriteHttpMethods[i]) {
-				this.sendCustomCommand(method)
-				break;
-			}
-		}
-		for (var i = 0; i < this.customReadHttpMethods.length; i++) {
-			if (method == this.customReadHttpMethods[i]) {
-				this.getCustomCommand(method)
-				break;
-			}
-		}
-      }
-   },
-   
-   postURL: function() {
-      this.handleSend("POST");
-   },
-   
-   putURL: function() {
-      this.handleSend("PUT");
-   },
-   
-   getURL: function() {
-      this.handleGet("GET");
-   },
-    getURLHotKey: function(event) {
-		if (event.keyCode==13) {  // if return key is pressed in URL field, do a GET
-			 this.handleGet("GET");
-		}
-   },
-   
-   deleteURL: function() {
-      this.handleGet("DELETE");
-   },
-   
-   headURL: function() {
-      this.handleGet("HEAD");
-   },
-   
-   optionsURL: function() {
-      this.handleGet("OPTIONS");
-   },
-   sendCustomCommand: function(method) {
-      this.handleSend(method);
-   },
-   getCustomCommand: function(method) {
-      this.handleGet(method);
-   },
-   
-   handleSend: function(method) {
-      var fpath = this.elements["filename"].value;
-      var content = this.elements["content"].value;
-      var urlstr = this.elements["url"].value;
-      var ctype = this.elements["contentType"].value;
-      if (ctype.length==0) {
-         this.elements["contentType"].value = "text/xml";
-         ctype = "text/xml";
-      }
-      
-      urlstr = this.addParametersToURI(urlstr);
-      
-      if (urlstr.length==0) {
-         alert("A URL must be specified.");
-         /*
-      } else if (fpath.length==0 && content.length==0) {
-         alert("Either a file or content must be specified.");
-         */
-      } else if (fpath.length!=0 && content.length!=0) {
-         alert("You can't have both a file and content to send.");
-      } else if (fpath.length!=0) {
-         this.synopsis = method+" on "+urlstr;
-         this.sendFileToURL(urlstr,method,fpath,ctype);
-      } else {
-         this.synopsis = method+" on "+urlstr;
-         this.sendContentToURL(urlstr,method,content,ctype);
-      }
-   },
-   handleGet: function(method) {
-      var urlstr = this.elements["url"].value;
-      if (urlstr.length==0) {
-         alert("A URL must be specified.");
-      } else {
-      	 // add default protocol if not set
-      	 if ( urlstr.indexOf( "://") == -1 ) { 
-      	 	urlstr = "http://" + urlstr;
-      	 }
-      	 
-      	 urlstr = this.addParametersToURI(urlstr);
+    RequestTransaction: function () {
+        this.httpMethod = null;
+        this.url = null;
+        this.requestHeaders = {},
+            this.contentType = null;
+        this.content = null;
+        this.parameters = {}
+        this.filename = null;
+        this.username = null;
+        this.password = null;
+        this.timeout = null;
+        this.base64 = null;
+    },
+    ResponseTransaction: function () {
+        this.title = null;
+        this.status = null;
+        this.statusText = null;
+        this.content = null;
+        this.responseHeaders = null;
+        this.responseTimeStamp = null;
+    },
 
-         this.synopsis = method+" on "+urlstr;
-         this.getContentFromURL(urlstr,method);
-      }
-   },
-   
-   pathToFile: function(path) {
-      var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
-      file.initWithPath(path);
-      return file;
-   },
-   
-   addParametersToURI : function(urlstr) { 
-   	     var needSeparator = false;
-		 var parameters = this.getParametersFromUI();
-         for (var name in parameters) {
-            if (needSeparator) {
-               urlstr += "&";
-            } else {
-               if (urlstr.indexOf('?')<0) {
-                  urlstr += "?";
-               }
-               else {
-               		urlstr += "&";
-               }
+    getPreferenceString: function (name) {
+        var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
+        if (preferencesService) {
+            try {
+                return preferencesService.getCharPref(name);
+            } catch (ex) {
+                // no preference
             }
-			var val = encodeURIComponent(parameters[name]);
-			if ( val != null && val.length > 0 ) { 
-          	  urlstr += name+"="+ val;
-			 }
-			 else {
-				urlstr += name;
-			}
+        }
+        return null;
+    },
+    getPreferenceComplex: function (name) {
+        var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
+        if (preferencesService) {
+            try {
+                return preferencesService.getComplexValue(name, Components.interfaces.nsISupportsString).data;
+            } catch (ex) {
+                // no preference
+            }
+        }
+        return null;
+    },
+    setPreferenceComplex: function (name, value) {
+        var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].
+            getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
+        if (preferencesService) {
+            try {
+                var sString = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+                sString.data = value;
+                preferencesService.setComplexValue(name, Components.interfaces.nsISupportsString, sString);
+            } catch (ex) {
+                // no preference
+            }
+        }
+    },
+    getPreferenceInt: function (name) {
+        var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
+        if (preferencesService) {
+            try {
+                return preferencesService.getIntPref(name);
+            } catch (ex) {
+                // no preference
+            }
+        }
+        return null;
+    },
+    getPreferenceBool: function (name) {
+        var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
+        if (preferencesService) {
+            try {
+                return preferencesService.getBoolPref(name);
+            } catch (ex) {
+                // no preference
+            }
+        }
+        return null;
+    },
+
+    setPreferenceString: function (name, value) {
+        var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
+        if (preferencesService) {
+            preferencesService.setCharPref(name, value);
+        }
+    },
+    getMaxHistory: function () {
+        var max = this.getPreferenceInt("maxhistory")
+        if (max == null) {
+            max = 25;
+        }
+        return max;
+    },
+
+    getMaxUrlHistory: function () {
+        var max = this.getPreferenceInt("url.maxhistory")
+        if (max == null) {
+            max = 10;
+        }
+        return max;
+    },
+    getMaxContentTypeHistory: function () {
+        var max = this.getPreferenceInt("contenttype.maxhistory")
+        if (max == null) {
+            max = 10;
+        }
+        return max;
+    },
+    getMaxHeaderHistory: function () {
+        var max = this.getPreferenceInt("header.maxhistory")
+        if (max == null) {
+            max = 10;
+        }
+        return max;
+    },
+    findInTextBox: function () {
+        // if the response-content is focused, we will perform a Find for the response content
+        if (document.getElementById("response-content").getAttribute("focused")) {
+            var nsIPromptService = Components.interfaces.nsIPromptService;
+            var nsPrompt_CONTRACTID = "@mozilla.org/embedcomp/prompt-service;1";
+            var gPromptService = Components.classes[nsPrompt_CONTRACTID].getService(nsIPromptService);
+            var result = { value: this.lastSearchString };
+            var dummy = { value: 0 };
+
+            if (gPromptService.prompt(window,
+                "Find text in response",
+                "Enter text to search for:",
+                result,
+                null,
+                dummy)) {
+                this.lastSearchString = result.value;
+
+                this.doFindNext();
+            }
+        }
+    },
+    doFindNext: function () {
+        // if the response-content is focused, we will perform a Find for the response content
+        if (document.getElementById("response-content").getAttribute("focused")) {
+            var text = document.getElementById("response-content").value;
+
+            var start = document.getElementById("response-content").selectionStart;
+
+            if (start < text.length - 1) {
+                start = start + 1;
+            }
+            var index = text.toUpperCase().indexOf(this.lastSearchString.toUpperCase(), start);
+            if (index == -1) {
+                // restart; look from the beginning
+                index = text.toUpperCase().indexOf(this.lastSearchString.toUpperCase());
+            }
+            if (index == -1) {
+                alert("No match found.");
+            }
+            else {
+                document.getElementById("response-content").select();
+                document.getElementById("response-content").setSelectionRange(index, (index + this.lastSearchString.length));
+            }
+        }
+
+    },
+
+    init: function () {
+        // show advanced section if preference is set
+        if (this.getPreferenceBool("showAdvancedOptions")) {
+            document.getElementById("advancedSettings1").setAttribute("hidden", false);
+            document.getElementById("advancedSettings2").setAttribute("hidden", false);
+            document.getElementById("advancedSettings3").setAttribute("hidden", false);
+        }
+        // There was a component that handled storing some values; this no longer works
+        // in Firefox 4, so was removed.  The values are instead stored to the preferences.
+        var httprequesterService = new Object();
+        //alert("Initializing with "+httprequesterService);
+        //if (!httprequesterService.contentType) {
+        httprequesterService.contentType = this.getPreferenceString("contentType");
+        //}
+        //if (!httprequesterService.contentType) {
+        httprequesterService.contentType = "text/xml";
+        //}
+        //if (!httprequesterService.url) {
+        httprequesterService.url = this.getPreferenceString("url");
+        //}
+        httprequesterService.file = "";
+
+        this.elements["filename"] = document.getElementById("filename");
+        this.elements["contentType"] = document.getElementById("ctype");
+        this.elements["username"] = document.getElementById("username");
+        this.elements["password"] = document.getElementById("password");
+        this.elements["content"] = document.getElementById("content");
+        this.elements["url"] = document.getElementById("url");
+        this.elements["timeout-slider"] = document.getElementById("timeout-slider");
+        this.elements["timeout"] = document.getElementById("timeout");
+
+        this.elements["filename"].value = httprequesterService.file;
+        this.elements["contentType"].value = httprequesterService.contentType;
+        this.elements["url"].value = httprequesterService.url;
+        if (httprequesterService.username) {
+            this.elements["username"].value = httprequesterService.username;
+        }
+        if (httprequesterService.password) {
+            this.elements["password"].value = httprequesterService.password;
+        }
+        var current = this;
+        this.elements["timeout-slider"].onchange = function () {
+            current.elements["timeout"].value = current.elements["timeout-slider"].value;
+        }
+        document.getElementById("base64-encode").onclick = function () {
+            var value = current.elements["content"].value;
+            if (value.length > 0) {
+                var encoder = new Base64();
+                current.elements["content"].value = encoder.encode(value);
+            }
+        }
+        document.getElementById("header-list").onkeypress = function (event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                current.onDeleteHeader();
+            }
+        };
+        document.getElementById("parameter-list").onkeypress = function (event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                current.onDeleteParameter();
+            }
+        };
+        document.getElementById("transaction-list").onkeypress = function (event) {
+            if (event.keyCode == 8 || event.keyCode == 46) {
+                current.onDeleteTransaction();
+            }
+        };
+        document.getElementById("transaction-list").ondblclick = function (event) {
+            current.viewRawRequest();
+        };
+
+
+        // load history
+        //pref("extensions.httprequester.history", 25);
+        var history = this.getPreferenceComplex("history");
+        if (history != null && history.length > 0) {
+            this.transactions = JSON.parse(history);
+
+            for (var i = this.transactions.length - 1; i >= 0; i--) {
+                this.addTransactionToList(this.transactions[i]);
+            }
+        }
+
+        // load urls
+        var urlHistory = this.getPreferenceComplex("url.history");
+        if (urlHistory != null && urlHistory.length > 0) {
+            this.urlHistory = JSON.parse(urlHistory);
+        }
+        else {
+            this.urlHistory = new Array();
+        }
+        this.updateMenuList("url", this.urlHistory);
+
+        // load content type history
+        var contentTypeHistory = this.getPreferenceComplex("contentType.history");
+        if (contentTypeHistory != null && contentTypeHistory.length > 0) {
+            this.contentTypeHistory = JSON.parse(contentTypeHistory);
+        }
+        else {
+            this.contentTypeHistory = new Array();
+        }
+        this.updateMenuList("ctype", this.contentTypeHistory);
+
+        // load headers
+        var headerHistory = this.getPreferenceComplex("header.history");
+        if (headerHistory != null && headerHistory.length > 0) {
+            this.headerNameHistory = JSON.parse(headerHistory);
+        }
+        else {
+            this.headerNameHistory = new Array();
+        }
+        this.updateMenuList("header-name", this.headerNameHistory);
+
+        // set appropriate content UI controls based on radio button
+        this.contentBodyRadioButtonChanged();
+
+        // load custom methods
+        var sendCommands = this.getPreferenceString("http.methods.custom.write");
+        if (sendCommands != null && sendCommands.length > 0) {
+            this.customWriteHttpMethods = JSON.parse(sendCommands);
+        }
+        else {
+            this.customWriteHttpMethods = new Array();
+        }
+        var readCommands = this.getPreferenceString("http.methods.custom.read");
+        if (readCommands != null && readCommands.length > 0) {
+            this.customReadHttpMethods = JSON.parse(readCommands);
+        }
+        else {
+            this.customReadHttpMethods = new Array();
+        }
+
+        // populate METHOD dropdown with custom methods
+        var methodList = document.getElementById("method");
+        for (var i = 0; i < this.customWriteHttpMethods.length; i++) {
+            var newMethod = document.createElement("menuitem");
+            newMethod.setAttribute("label", this.customWriteHttpMethods[i]);
+            newMethod.setAttribute("value", this.customWriteHttpMethods[i]);
+            methodList.firstChild.appendChild(newMethod);
+        }
+        for (var i = 0; i < this.customReadHttpMethods.length; i++) {
+            var newMethod = document.createElement("menuitem");
+            newMethod.setAttribute("label", this.customReadHttpMethods[i]);
+            newMethod.setAttribute("value", this.customReadHttpMethods[i]);
+            methodList.firstChild.appendChild(newMethod);
+        }
+    },
+    saveSettings: function () {
+        var historyString = JSON.stringify(this.transactions);
+        this.setPreferenceComplex("history", historyString);
+
+        var urlhistoryString = JSON.stringify(this.urlHistory);
+        this.setPreferenceComplex("url.history", urlhistoryString);
+
+        var contentTypehistoryString = JSON.stringify(this.contentTypeHistory);
+        this.setPreferenceComplex("contentType.history", contentTypehistoryString);
+
+        var headerHistoryString = JSON.stringify(this.headerNameHistory);
+        this.setPreferenceComplex("header.history", headerHistoryString);
+    },
+
+    saveValues: function () {
+
+
+        this.setPreferenceString("file", this.elements["filename"].value);
+        this.setPreferenceString("contentType", this.elements["contentType"].value);
+        this.setPreferenceString("url", this.elements["url"].value);
+        this.setPreferenceString("username", this.elements["username"].value);
+        this.setPreferenceString("password", this.elements["password"].value);
+    },
+
+    importValues: function () {
+        this.elements["filename"].value = this.getPreferenceString("file");
+        this.elements["contentType"].value = this.getPreferenceString("contentType");
+        this.elements["url"].value = this.getPreferenceString("url");
+        this.elements["username"].value = this.getPreferenceString("username");
+        this.elements["password"].value = this.getPreferenceString("password");
+    },
+
+    savePreferences: function () {
+        this.setPreferenceString("contentType", this.elements["contentType"].value);
+        this.setPreferenceString("url", this.elements["url"].value);
+    },
+
+    /*
+     * Open a "browse for folder" dialog to locate an extension directory
+     * Add the the selected directory to the dropdown list and set it as
+     * the current working directory.
+     */
+    browseForFile: function () {
+        var nsIFilePicker = Components.interfaces.nsIFilePicker;
+        var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+        fp.init(window, "Choose File to Upload", nsIFilePicker.modeOpen);
+        if (fp.show() == nsIFilePicker.returnOK) {
+            var filenm = this.elements["filename"];
+            var item = filenm.value = fp.file.path;
+            //httprequesterService.file = fp.file.path;
+            try {
+                this.elements["contentType"].value = mimeService.getTypeFromFile(fp.file);
+            } catch (ex) {
+                this.elements["contentType"].value = "application/binary";
+            }
+        }
+    },
+    showGoogleLogin: function () {
+        var currentApp = this;
+        var data = {
+            username: this.elements["username"].value,
+            password: this.elements["password"].value,
+            service: currentApp.lastService,
+            auth: null
+        };
+        window.openDialog(
+            'chrome://httprequester/content/google-login.xul', 'google-login', 'modal,centerscreen,chrome,resizable',
+            data
+        );
+        if (data.success) {
+            this.googleAuth = data.auth;
+            //this.requestHeaders["authorization"] = "GoogleLogin auth="+this.googleAuth;
+            this.addRequestHeader(authorization, "GoogleLogin auth=" + this.googleAuth);
+            document.getElementById('google-login').setAttribute("label", "Google Auth'd");
+        }
+        this.servive = data.service;
+    },
+
+
+    doMethodRequest: function () {
+        var method = document.getElementById("method").value;
+        if (method == "GET") {
+            this.getURL();
+        } else if (method == "POST") {
+            this.postURL();
+        } else if (method == "PUT") {
+            this.putURL();
+        } else if (method == "DELETE") {
+            this.deleteURL();
+        } else if (method == "HEAD") {
+            this.headURL();
+        } else if (method == "OPTIONS") {
+            this.optionsURL();
+        }
+        else {
+            // custom methods
+            for (var i = 0; i < this.customWriteHttpMethods.length; i++) {
+                if (method == this.customWriteHttpMethods[i]) {
+                    this.sendCustomCommand(method)
+                    break;
+                }
+            }
+            for (var i = 0; i < this.customReadHttpMethods.length; i++) {
+                if (method == this.customReadHttpMethods[i]) {
+                    this.getCustomCommand(method)
+                    break;
+                }
+            }
+        }
+    },
+
+    postURL: function () {
+        this.handleSend("POST");
+    },
+
+    putURL: function () {
+        this.handleSend("PUT");
+    },
+
+    getURL: function () {
+        this.handleGet("GET");
+    },
+    getURLHotKey: function (event) {
+        if (event.keyCode == 13) {  // if return key is pressed in URL field, do a GET
+            this.handleGet("GET");
+        }
+    },
+
+    deleteURL: function () {
+        this.handleGet("DELETE");
+    },
+
+    headURL: function () {
+        this.handleGet("HEAD");
+    },
+
+    optionsURL: function () {
+        this.handleGet("OPTIONS");
+    },
+    sendCustomCommand: function (method) {
+        this.handleSend(method);
+    },
+    getCustomCommand: function (method) {
+        this.handleGet(method);
+    },
+
+    handleSend: function (method) {
+        var fpath = this.elements["filename"].value;
+        var content = this.elements["content"].value;
+        var urlstr = this.elements["url"].value;
+        var ctype = this.elements["contentType"].value;
+        if (ctype.length == 0) {
+            this.elements["contentType"].value = "text/xml";
+            ctype = "text/xml";
+        }
+
+        urlstr = this.addParametersToURI(urlstr);
+
+        if (urlstr.length == 0) {
+            alert("A URL must be specified.");
+            /*
+             } else if (fpath.length==0 && content.length==0) {
+             alert("Either a file or content must be specified.");
+             */
+        } else if (fpath.length != 0 && content.length != 0) {
+            alert("You can't have both a file and content to send.");
+        } else if (fpath.length != 0) {
+            this.synopsis = method + " on " + urlstr;
+            this.sendFileToURL(urlstr, method, fpath, ctype);
+        } else {
+            this.synopsis = method + " on " + urlstr;
+            this.sendContentToURL(urlstr, method, content, ctype);
+        }
+    },
+    handleGet: function (method) {
+        var urlstr = this.elements["url"].value;
+        if (urlstr.length == 0) {
+            alert("A URL must be specified.");
+        } else {
+            // add default protocol if not set
+            if (urlstr.indexOf("://") == -1) {
+                urlstr = "http://" + urlstr;
+            }
+
+            urlstr = this.addParametersToURI(urlstr);
+
+            this.synopsis = method + " on " + urlstr;
+            this.getContentFromURL(urlstr, method);
+        }
+    },
+
+    pathToFile: function (path) {
+        var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+        file.initWithPath(path);
+        return file;
+    },
+
+    addParametersToURI: function (urlstr) {
+        var needSeparator = false;
+        var parameters = this.getParametersFromUI();
+        for (var name in parameters) {
+            if (needSeparator) {
+                urlstr += "&";
+            } else {
+                if (urlstr.indexOf('?') < 0) {
+                    urlstr += "?";
+                }
+                else {
+                    urlstr += "&";
+                }
+            }
+            var val = encodeURIComponent(parameters[name]);
+            if (val != null && val.length > 0) {
+                urlstr += name + "=" + val;
+            }
+            else {
+                urlstr += name;
+            }
             needSeparator = true;
-         }
-         return urlstr;
-   },
-   
-   onResult: function(status,xml,text,headers,statusText, id) {
-	  var responseDateStamp = new Date().getTime();
-      this.inprogress = null;
-      if (this.progressDialog) {
-         this.progressDialog.close();
-         this.progressDialog = null;
-      }
-      var title = this.synopsis;
-	var response = new this.ResponseTransaction();
-	response.title = title;
-	response.status = status;
-	response.statusText = statusText;
-	response.content = text;
-	response.responseHeaders = headers;
-	
-	// get transaction for this id to add the response
-	for ( var i = 0; i < this.transactions.length; i++ ) {
-		if ( this.transactions[i].timeStamp == id ) {
-			// set response time stamp			
-			response.responseTimeStamp = responseDateStamp;
-			
-			this.transactions[i].responseTransaction = response;
-			// now update the list with the response
-			this.editTransactionInList( this.transactions[i] );
-			
-			break;
-		}
-	}
-	
-   },
-   
+        }
+        return urlstr;
+    },
+
+    onResult: function (status, xml, text, headers, statusText, id) {
+        var responseDateStamp = new Date().getTime();
+        this.inprogress = null;
+        if (this.progressDialog) {
+            this.progressDialog.close();
+            this.progressDialog = null;
+        }
+        var title = this.synopsis;
+        var response = new this.ResponseTransaction();
+        response.title = title;
+        response.status = status;
+        response.statusText = statusText;
+        response.content = text;
+        response.responseHeaders = headers;
+
+        // get transaction for this id to add the response
+        for (var i = 0; i < this.transactions.length; i++) {
+            if (this.transactions[i].timeStamp == id) {
+                // set response time stamp
+                response.responseTimeStamp = responseDateStamp;
+
+                this.transactions[i].responseTransaction = response;
+                // now update the list with the response
+                this.editTransactionInList(this.transactions[i]);
+
+                break;
+            }
+        }
+
+    },
+
    sendFileToURL: function(urlstr,method,fpath,ctype) {
       try{
          //alert("Sending "+fpath+" to "+urlstr+" as "+ctype+" via "+method);
@@ -622,6 +622,7 @@ var App = {
 		request.username = username;
 		request.password = password;
 		this.requestAdded( transaction, request );
+        var headersToSend = this.getHeadersWithAuthorization(username, password, request);
 		 
          var req = HTTP(
             method,
@@ -630,7 +631,7 @@ var App = {
                timeout: timeout,
                contentType: ctype,
                body: bufferedStream,
-               headers: request.requestHeaders,
+               headers: headersToSend,
                username: username,
                password: password,
                returnHeaders: true,
@@ -688,16 +689,16 @@ var App = {
 		request.username = username;
 		request.password = password;
 		this.requestAdded( transaction, request );
-		
-		
-        this.inprogress = HTTP(
+        var headersToSend = this.getHeadersWithAuthorization(username, password, request);
+
+         this.inprogress = HTTP(
            method,
            urlstr, 
            {
               timeout: timeout,
               contentType: ctype,
               body: content,
-              headers: request.requestHeaders,
+              headers: headersToSend,
               username: username,
               password: password,
 			  id : transaction.timeStamp,
@@ -1132,37 +1133,55 @@ var App = {
 		} 
   
   },
- 
-  getContentFromURL: function(urlstr,method) {
-     try{
-        if (this.inprogress) {
-           var requestToCancel = this.inprogress;
-           this.inprogress = null;
-           requestToCancel.abort();
+
+    getHeadersWithAuthorization: function (username, password, request) {
+        if ( username != null && username != "" && password != null ) {
+            var encoder = new Base64();
+            var encodedUserPass = encoder.encode(username + ":" + password);
+
+            var headersToSend = {};
+            for (var i in request.requestHeaders) {
+                headersToSend[i] = request.requestHeaders[i];
+            }
+            // add Base64-encoded auth header
+            headersToSend[ "Authorization" ] = "Basic " + encodedUserPass;
+            return headersToSend;
         }
-        var currentApp = this;
-        var timeout = parseInt(this.elements["timeout-slider"].value)*1000;
-        var username = this.elements["username"].value;
-        var password = this.elements["password"].value;
-		
-		
-		// create a Request
-		var dateStamp = new Date().getTime();
-		var transaction = new this.Transaction();
-		transaction.timeStamp = dateStamp;
-		
-		var request = new this.RequestTransaction();
-		request.httpMethod = method;
-		request.url = urlstr;
-		
-		request.requestHeaders = this.getRequestHeadersFromUI();	
-		
-		request.timeout = timeout;
-		request.username = username;
-		request.password = password;
-		
-		this.requestAdded( transaction, request );
-		// end create
+        else {
+            return request.requestHeaders;
+        }
+    },
+
+    getContentFromURL: function(urlstr,method) {
+     try {
+         if (this.inprogress) {
+             var requestToCancel = this.inprogress;
+             this.inprogress = null;
+             requestToCancel.abort();
+         }
+         var currentApp = this;
+         var timeout = parseInt(this.elements["timeout-slider"].value) * 1000;
+         var username = this.elements["username"].value;
+         var password = this.elements["password"].value;
+
+
+         // create a Request
+         var dateStamp = new Date().getTime();
+         var transaction = new this.Transaction();
+         transaction.timeStamp = dateStamp;
+
+         var request = new this.RequestTransaction();
+         request.httpMethod = method;
+         request.url = urlstr;
+
+         request.requestHeaders = this.getRequestHeadersFromUI();
+
+         request.timeout = timeout;
+         request.username = username;
+         request.password = password;
+         this.requestAdded( transaction, request );
+         var headersToSend = this.getHeadersWithAuthorization(username, password, request);
+         // end create
 
 		
         this.inprogress = HTTP(
@@ -1172,7 +1191,7 @@ var App = {
               timeout: timeout,
               username: username,
               password: password,
-              headers: request.requestHeaders,
+              headers: headersToSend,
               returnHeaders: true,
 			  id : transaction.timeStamp,
               onOpened: function(request) {
@@ -1524,6 +1543,23 @@ contentBodyRadioButtonChanged: function() {
 	
 	
 },
+  toggleAdvancedOptions: function() {
+      var hidden = document.getElementById("advancedSettings1").getAttribute("hidden");
+      if ( hidden != "true" ) {
+          document.getElementById("advancedSettings1").setAttribute("hidden", true);
+          document.getElementById("advancedSettings2").setAttribute("hidden", true);
+          document.getElementById("advancedSettings3").setAttribute("hidden", true);
+      }
+      else {
+          document.getElementById("advancedSettings1").setAttribute("hidden", false);
+          document.getElementById("advancedSettings2").setAttribute("hidden", false);
+
+          if (this.getPreferenceBool("showAdvancedOptions")) {
+              document.getElementById("advancedSettings3").setAttribute("hidden", false);
+          }
+      }
+  },
+
   pasteRawRequest: function() {
 	var requestStr = this.copyTextfromClipboard();
 	var newOptions = {

@@ -39,9 +39,9 @@
             </row>
 			
             <row id="advancedSettings1" hidden="true">
-               <label value="User Auth:"/>
+               <label value="Authorization:"/>
                <hbox flex="1">
-                  <textbox id='username' flex="1"/><textbox id='password' type='password' flex="1"/><button id="google-login" label="Google Login" oncommand="App.showGoogleLogin()"/>
+                  <textbox id='username' flex="1"/><textbox id='password' type='password' flex="1"/><button id="google-login" label="Google Login..." oncommand="App.showGoogleLogin()"/>
                </hbox>
             </row>
             <row id="advancedSettings2" hidden="true">
@@ -77,9 +77,11 @@
 	      <button label="POST" tooltiptext="POSt Request" oncommand="App.postURL();"/>
 	      <button label="PUT" tooltiptext="PUT Request" oncommand="App.putURL();"/>
 		  <separator orient="vertical" class="groove"/>
-	 	  <button label="New request" tooltiptext="Clear values to create a new empty request" oncommand="App.clearRequest()"/>
+          <button label="Login" tooltiptext="Toggle login authentication entry" oncommand="App.toggleAdvancedOptions()"/>
+          <separator orient="vertical" class="groove"/>
+          <button label="New request" tooltiptext="Clear values to create a new empty request" oncommand="App.clearRequest()"/>
 		  <button label="Paste Request" tooltiptext="Paste request from clipboard" oncommand="App.pasteRawRequest()"/>
-	     
+
       </hbox>
 
       <tabbox id='content-tabs' flex="2">

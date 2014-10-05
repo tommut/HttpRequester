@@ -105,6 +105,16 @@ function HTTP(method,url,options)
    if (options.overrideMimeType) {
       requester.overrideMimeType(options.overrideMimeType);
    }
+
+    // username/password can not accurately be set on XMLHttpRequest parameter, as it is not
+    // fully supported; instead the Authorization header is added previously
+    options.username = null;
+    options.password = null;
+//    for (var key in options.headers) {
+//        alert("key: " + key + " = " + options.headers[key])
+//    }
+
+
    if (options.username) {
       requester.open(method,url,!options.synchronizedRequest,options.username,options.password);
    } else {

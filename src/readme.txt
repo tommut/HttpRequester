@@ -1,5 +1,16 @@
 HttpRequester is a modified version of the excellent Poster add-on available for Mozilla Firefox.  
 HttpRequester is distributed under the the BSD License: http://www.opensource.org/licenses/bsd-license.php
+
+1.0.6 (10/5/2014):
+1) Added 'Login' button to toggle displaying an entry to add username and password for Basic authentication.  This will ensure that
+ the appropriate Authorization information is sent with the request.
+2)
+
+
+1.0.5 (02/02/2014):
+ Replaced status-bar (addons bar) icon with a toolbar icon. Toolbar icons can be placed anywhere by right-clicking and selecting "Customize..."
+
+
 1.0.4: (01/23/2012):
 1) Via user request: added ability to add custom methods to the list of 
 available HTTP methods.  Useful for adding things like PATCH (now an Proposed Standard -- RFC 5789).
