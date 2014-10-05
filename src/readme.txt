@@ -4,7 +4,6 @@ HttpRequester is distributed under the the BSD License: http://www.opensource.or
 1.0.6 (10/5/2014):
 1) Added 'Login' button to toggle displaying an entry to add username and password for Basic authentication.  This will ensure that
  the appropriate Authorization information is sent with the request.
-2)
 
 
 1.0.5 (02/02/2014):

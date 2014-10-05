@@ -81,7 +81,6 @@
           <separator orient="vertical" class="groove"/>
           <button label="New request" tooltiptext="Clear values to create a new empty request" oncommand="App.clearRequest()"/>
 		  <button label="Paste Request" tooltiptext="Paste request from clipboard" oncommand="App.pasteRawRequest()"/>
-
       </hbox>
 
       <tabbox id='content-tabs' flex="2">

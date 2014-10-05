@@ -623,7 +623,7 @@ var App = {
 		request.password = password;
 		this.requestAdded( transaction, request );
         var headersToSend = this.getHeadersWithAuthorization(username, password, request);
-		 
+
          var req = HTTP(
             method,
             urlstr, 
