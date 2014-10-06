@@ -106,6 +106,12 @@ var App = {
             preferencesService.setCharPref(name, value);
         }
     },
+    setPreferenceBool: function (name, value) {
+        var preferencesService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.httprequester.");
+        if (preferencesService) {
+            preferencesService.setBoolPref(name, value);
+        }
+    },
     getMaxHistory: function () {
         var max = this.getPreferenceInt("maxhistory")
         if (max == null) {
@@ -189,6 +195,12 @@ var App = {
             document.getElementById("advancedSettings2").setAttribute("hidden", false);
             document.getElementById("advancedSettings3").setAttribute("hidden", false);
         }
+
+        if (this.getPreferenceBool("prettyPrintResponse")) {
+            var prettyPrintCheckbox = document.getElementById("prettyPrint");
+            prettyPrintCheckbox.setAttribute("checked", true);
+        }
+
         // There was a component that handled storing some values; this no longer works
         // in Firefox 4, so was removed.  The values are instead stored to the preferences.
         var httprequesterService = new Object();
@@ -1522,6 +1534,19 @@ contentBodyRadioButtonChanged: function() {
     	document.getElementById("content").setAttribute("disabled", "true");
     }
 },
+    togglePrettyPrint: function() {
+        var oldPrettyPrint = this.getPreferenceBool("prettyPrintResponse");
+        var prettyPrint = !oldPrettyPrint;
+        this.setPreferenceBool("prettyPrintResponse", prettyPrint );
+
+
+        var prettyPrintCheckbox = document.getElementById("prettyPrint");
+        prettyPrintCheckbox.setAttribute("checked", prettyPrint);
+
+        // refresh the selected item so that the response can be reloaded
+        // with the new pretty print option
+        App.selectListItem();
+    },
 
   viewRawRequest: function() {
 	var transaction = this.getRequestAndResponseString();	  

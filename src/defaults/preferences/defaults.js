@@ -11,6 +11,7 @@ pref("extensions.httprequester.header.history", "[\"Authorization\",\"Accept\",\
 
 pref("extensions.httprequester.default.protocol", "https");
 pref("extensions.httprequester.showAdvancedOptions", false);
+pref("extensions.httprequester.prettyPrintResponse", false);
 
 pref("extensions.httprequester.http.methods.custom.write",  "[\"PROPFIND\"]");
 pref("extensions.httprequester.http.methods.custom.read",  "[\"COPY\",\"MOVE\"]");
