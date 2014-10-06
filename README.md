@@ -1,8 +1,12 @@
 HttpRequester
 =============
-HttpRequester is a modified version of the excellent Poster add-on available for Mozilla Firefox.  
+HttpRequester is a tool for easily making HTTP requests (GET/PUT/POST/DELETE), viewing the responses, and keeping a history of transactions.
 
-Originally developed by Tom Mutdosch
+This tool is useful when doing web or REST development, or when you need to make HTTP requests that are not easily done via the browser (PUT/POST/DELETE).
+
+This is based off of Alex Milowski's excellent Poster addon, with a large focus on keeping a history of transactions, allowing you to go back and review, re-execute, load, and save HTTP requests. 
+
+Developed by Tom Mutdosch
 
 Distributed under the BSD License
 http://www.opensource.org/licenses/bsd-license.php
