@@ -201,6 +201,17 @@ var App = {
             prettyPrintCheckbox.setAttribute("checked", true);
         }
 
+        var group = document.getElementById("responseRenderType");
+        //window.alert( "PREF1: " + this.getPreferenceBool("renderResponseBrowser"))
+
+        if (this.getPreferenceBool("renderResponseBrowser")) {
+            group.selectedIndex = 0;
+        }
+        else {
+            group.selectedIndex =1;
+        }
+        //window.alert( "GROUP: " + group.selectedIndex + " PREF: " + this.getPreferenceBool("renderResponseBrowser"))
+
         // There was a component that handled storing some values; this no longer works
         // in Firefox 4, so was removed.  The values are instead stored to the preferences.
         var httprequesterService = new Object();
@@ -1534,6 +1545,24 @@ contentBodyRadioButtonChanged: function() {
     	document.getElementById("content").setAttribute("disabled", "true");
     }
 },
+    responseRenderTypeChanged: function() {
+        var group = document.getElementById("responseRenderType");
+
+        if ( group.selectedIndex == 1 ) {
+            // text
+            this.setPreferenceBool("renderResponseBrowser", false );
+            document.getElementById("browserIframe").setAttribute("hidden", true);
+            document.getElementById("response-content").setAttribute("hidden", false);
+        }
+        else {
+            this.setPreferenceBool("renderResponseBrowser", true );
+            document.getElementById("browserIframe").setAttribute("hidden", false);
+            document.getElementById("response-content").setAttribute("hidden", true);
+        }
+        // refresh the selected item so that the response can be reloaded
+        // with the new pretty print option
+        App.selectListItem();
+    },
     togglePrettyPrint: function() {
         var oldPrettyPrint = this.getPreferenceBool("prettyPrintResponse");
         var prettyPrint = !oldPrettyPrint;

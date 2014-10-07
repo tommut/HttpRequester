@@ -6,4 +6,17 @@
 			<zipfileset dir="../src" includes="install.rdf, install.js,chrome.manifest,chrome/**,defaults/**,components/**,content/**,skin/**,locale/**"/>
 		</zip>
 	</target>
+
+    <property name="httpRequesterProfileDirectory" value="/Users/tommut/Library/Application Support/Firefox/Profiles/weovqtaq.reminderfox-dev/extensions/{ea4637dc-e014-4c17-9c2c-879322d23268}" />
+    <property name="restartFirefoxScript" value="/Users/tommut/dev/ff-addons/launchFFSavePID.sh" />
+    <target name="copyToDevDirectory" >
+        <copydir src="../src"
+                 dest="${httpRequesterProfileDirectory}"
+                 includes="**/*.*" />
+        <!-- relaunch firefox -->
+        <exec executable="/bin/bash">
+            <arg value="${restartFirefoxScript}"/>
+        </exec>
+
+    </target>
 </project>

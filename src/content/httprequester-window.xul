@@ -68,6 +68,7 @@
 	            <menuitem label="PUT" value="PUT"/>
 	            <menuitem label="DELETE" value="DELETE"/>
 	            <menuitem label="HEAD" value="HEAD"/>
+                <menuitem label="PATCH" value="PATCH"/>
 	            <menuitem label="OPTIONS" value="OPTIONS"/>
 	         </menupopup>
 	      </menulist>
@@ -174,13 +175,25 @@
 	         <label value="Status:"/>
 	         <label id="code" value=""/>
 	         <spacer flex="1"/>
+
+              <radiogroup id="responseRenderType" onselect="App.responseRenderTypeChanged()">
+                  <row align="center">
+                      <radio group="position" label="Browser" value="0"  />
+                      <radio group="position" label="Text" value="1" />
+                  </row>
+              </radiogroup>
+
               <checkbox id="prettyPrint" label="Pretty print"
                         autocheck="false" oncommand="App.togglePrettyPrint();" />
 	         <label align="end"  class="small-margin, text-link" value="View raw transaction" onclick="App.viewRawRequest();" crop="end"/>
 	      </hbox>
+          <separator orient="horizontal" class="groove"/>
 	      <vbox minheight="100px" flex="3">
-	      	<textbox id="response-content" multiline="true" flex="3"/>
+	      	  <textbox id="response-content" multiline="true" flex="3"/>
+              <!--<browser id="browserIframe2" src="file:///Users/tommut/httprequester.response.tmp.xml" flex="1" />-->
+              <iframe id="browserIframe" flex="1" />
 	      </vbox>
+          <separator orient="horizontal" class="groove"/>
 	      <vbox>
 	         <label value="Headers:"/>
 	         <grid flex="1">

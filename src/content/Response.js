@@ -11,10 +11,12 @@ var Response = {
       var titleE = document.getElementById("title");
 	  while (titleE.hasChildNodes()) {
 	     titleE.removeChild(titleE.firstChild);
-	  }	
+	  }
+
       titleE.appendChild(document.createTextNode(data.title));
       this.setResponseStatus(data.status+" "+data.statusText);
-      this.setResponseContent(data.content, data.responseHeaders['Content-Type']);
+      // alert( "SETTING : " + data.url)
+      this.setResponseContent(data.content, data.responseHeaders['Content-Type'], data.url);
 	  
 	  var grid = document.getElementById("headers");
 	  while (grid.hasChildNodes()) {
@@ -112,27 +114,128 @@ var Response = {
         return formatted;
     },
 
-    setResponseContent: function(content, contentType) {
-        formattedContent = content;
-
-        var prettyPrint = App.getPreferenceBool("prettyPrintResponse");
-        if (prettyPrint) {
-            // if pretty print is on, format the response before displaying in
-            // response content field
-            if (contentType && contentType.search('application/json') > -1) {
-                formattedContent = JSON.stringify(JSON.parse(content), null, 4);
-            }
-            else if (contentType && contentType.search('application/xml') > -1) {
-                formattedContent = this.formatXml(content);
-            }
-            else if (contentType && contentType.search('text/html') > -1) {
-                // the formatXml method does a better job but does not perform as well
-                //formattedContent = this.formatXml(content);
-                formattedContent = this.formatXmlFast(content);
+    getFileExtensionFromRequestUri: function (requestUrl) {
+        var fileExtension = null;
+        var checkFileExtension = App.getPreferenceBool("checkFileExtensionForRenderType");
+        if (checkFileExtension && requestUrl != null) {
+            var index = requestUrl.lastIndexOf("/");
+            if (index > -1) {
+                var lastRequestSegment = requesturl.substring(index);
+                index = lastRequestSegment.lastIndexOf(".");
+                if (index > -1 && index < lastRequestSegment.length - 1) {
+                    fileExtension = lastRequestSegment.substring(index + 1);
+                }
             }
         }
-        document.getElementById("response-content").value = formattedContent ? formattedContent : "";
     },
+    getFileExtensionFromContentType: function (contentType) {
+// determine file extension from content type
+        var fileExtension = null;
+        //alert( "Content type: " + contentType )
+        if (contentType && contentType.search('json') > -1) {
+            fileExtension = "json";
+        }
+        else if (contentType && contentType.search('xml') > -1) {
+            fileExtension = "xml";
+        }
+        else if (contentType && contentType.search('html') > -1) {
+            fileExtension = "html";
+        }
+        else {
+            fileExtension = "txt";
+        }
+        //alert( "RETURNING THIS: " + fileExtension );
+        return fileExtension;
+    },
+
+    saveResponseToFile: function (fileExtension, formattedContent) {
+        // write out to file
+        var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsIFile);
+
+        var xFile = Components.classes["@mozilla.org/file/directory_service;1"]
+            .getService(Components.interfaces.nsIProperties)
+            .get("ProfD", Components.interfaces.nsIFile);
+        xFile.append("httpRequester");
+        xFile.append("httprequester.response." + fileExtension);
+        var defaultFilePath = xFile.path;
+        file.initWithPath(defaultFilePath);
+        if (file.exists() === false) {
+            file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 420);
+        }
+        this.writeStringToFile(formattedContent, file);
+
+        return defaultFilePath;
+    },
+
+    setResponseContent: function(content, contentType, requestUrl) {
+        formattedContent = content;
+        if (formattedContent != null) {
+            var prettyPrint = App.getPreferenceBool("prettyPrintResponse");
+            if (prettyPrint) {
+                // if pretty print is on, format the response before displaying in
+                // response content field
+                if (contentType && contentType.search(/application\/.*json/i) > -1) {
+                    formattedContent = JSON.stringify(JSON.parse(content), null, 4);
+                }
+                else if (contentType && contentType.search(/application\/.*xml/i) > -1) {
+                    formattedContent = this.formatXml(content);
+                }
+                else if (contentType && contentType.search('text/html') > -1) {
+                    // the formatXml method does a better job but does not perform as well
+                    //formattedContent = this.formatXml(content);
+                    formattedContent = this.formatXmlFast(content);
+                }
+            }
+         }
+
+        var renderWithBrowser = App.getPreferenceBool("renderResponseBrowser");
+        if ( renderWithBrowser ) {
+            // if pref is set to checkFileExtension (user may want to turn this off if requests end
+            // in .something and want to use the content type always instead), then look for a file
+            // extension.  If there is one, just write the file out to that.
+            var fileExtension = this.getFileExtensionFromRequestUri(requestUrl);
+            //alert ( "fE1 : " + fileExtension)
+            if ( fileExtension == null ) {
+                fileExtension = this.getFileExtensionFromContentType(contentType);
+            }
+            var filePath = this.saveResponseToFile(fileExtension, formattedContent);
+            //alert( "FILE EXTENSION: " + fileExtension + " -- path: " + filePath )
+            document.getElementById("browserIframe").removeAttribute("src" );
+
+            document.getElementById("browserIframe").setAttribute("src","file://" + filePath);
+           // alert( "request: " + requestUrl + "\nIframe: " + document.getElementById("browserIframe").getAttribute("src") )
+        }
+        else {
+            document.getElementById("response-content").value = formattedContent ? formattedContent : "";
+        }
+
+     },
+
+    writeStringToFile : function(outputStr, file){
+    var outputStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+        .createInstance(Components.interfaces.nsIFileOutputStream);
+    outputStream.init(file, 0x04 | 0x08 | 0x20, 420, 0);
+
+    var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+        .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+    converter.charset = "UTF-8";
+
+    var chunk = null;
+    try {
+        chunk = converter.ConvertFromUnicode(outputStr);
+    }
+    catch (e) {
+        chunk = outputStr;
+    }
+    outputStream.write(chunk, chunk.length);
+
+    var fin = converter.Finish();
+    if (fin.length > 0)
+        outputStream.write(fin, fin.length);
+    outputStream.close();
+
+    },
+
    addResponseHeader: function(name,value) {
       var grid = document.getElementById("headers");
       var row = grid.ownerDocument.createElement("row");
