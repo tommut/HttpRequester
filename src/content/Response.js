@@ -15,9 +15,8 @@ var Response = {
 
       titleE.appendChild(document.createTextNode(data.title));
       this.setResponseStatus(data.status+" "+data.statusText);
-      // alert( "SETTING : " + data.url)
       this.setResponseContent(data.content, data.responseHeaders['Content-Type'], data.url);
-	  
+
 	  var grid = document.getElementById("headers");
 	  while (grid.hasChildNodes()) {
 	     grid.removeChild(grid.firstChild);
@@ -167,6 +166,13 @@ var Response = {
         return defaultFilePath;
     },
 
+    log : function( msg ) {
+        var cs1 = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
+        cs1.logStringMessage("httprequester: " + msg);
+        console.error(msg)
+    },
+
+
     setResponseContent: function(content, contentType, requestUrl) {
         formattedContent = content;
         if (formattedContent != null) {
@@ -194,21 +200,24 @@ var Response = {
             // in .something and want to use the content type always instead), then look for a file
             // extension.  If there is one, just write the file out to that.
             var fileExtension = this.getFileExtensionFromRequestUri(requestUrl);
-            //alert ( "fE1 : " + fileExtension)
             if ( fileExtension == null ) {
                 fileExtension = this.getFileExtensionFromContentType(contentType);
             }
-            var filePath = this.saveResponseToFile(fileExtension, formattedContent);
-            //alert( "FILE EXTENSION: " + fileExtension + " -- path: " + filePath )
-            document.getElementById("browserIframe").removeAttribute("src" );
 
+            var filePath = this.saveResponseToFile(fileExtension, formattedContent);
+
+            // need to first change the url (we user a dummy url); otherwise, if navigating
+            // between two XML or HTML files, the URL would be the same and changing it woudl
+            // do nothing
+            document.getElementById("browserIframe").setAttribute("src","file://tmp" );
             document.getElementById("browserIframe").setAttribute("src","file://" + filePath);
-           // alert( "request: " + requestUrl + "\nIframe: " + document.getElementById("browserIframe").getAttribute("src") )
+
+            //this.log("request: " + requestUrl + "\nIframe: " + document.getElementById("browserIframe").getAttribute("src")  + " \nfilepath: " + filePath);
         }
         else {
+            // update the response content text field
             document.getElementById("response-content").value = formattedContent ? formattedContent : "";
         }
-
      },
 
     writeStringToFile : function(outputStr, file){

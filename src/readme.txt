@@ -1,10 +1,14 @@
 HttpRequester is a modified version of the excellent Poster add-on available for Mozilla Firefox.  
 HttpRequester is distributed under the the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
-1.0.6 (10/5/2014):
-1) Added 'Login' button to toggle displaying an entry to add username and password for Basic authentication.  This will ensure that
- the appropriate Authorization information is sent with the request.
-2) Added option to Pretty-print the response for XML/HTML and JSON responses.
+1.1 (10/7/2014):
+ Added option to display response in an embedded browser.
+  This works well in conjunction with XML Pretty Viewer and JSON View addons.  The embedded browser will utilize the nicely formatted displays that those addons provide.
+ Added option to pretty-print JSON and XML responses.
+ Added resizable sections to allow individually resizing the request and response areas, as well as the Response Headers and History.
+ Added Authentication button to allow for entering username/password for Basic Authentication. his will ensure that the appropriate Authorization header is sent with the request.
+ Added PATCH to the list of HTTP methods
+ Added tooltip text for request URL list items
 
 1.0.5 (02/02/2014):
  Replaced status-bar (addons bar) icon with a toolbar icon. Toolbar icons can be placed anywhere by right-clicking and selecting "Customize..."

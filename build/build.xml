@@ -1,6 +1,6 @@
-<project name="httprequester" default="createWholeXpiForRelease">
+<project name="httprequester" default="copyToDevDirectory">
 	<tstamp />
-	<property name="httprequesterReleaseVersion" value="1.0.4"/>
+	<property name="httprequesterReleaseVersion" value="1.1"/>
 	<target name="createWholeXpiForRelease" >
 		<zip destfile="../downloads/httprequester-${httprequesterReleaseVersion}.xpi">
 			<zipfileset dir="../src" includes="install.rdf, install.js,chrome.manifest,chrome/**,defaults/**,components/**,content/**,skin/**,locale/**"/>

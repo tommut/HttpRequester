@@ -23,18 +23,16 @@ row {
 }
 
 
-p.label { 
+p.label {
    margin: 0pt;
    padding: 2pt;
    font-weight: bold;
 }
 
-div.drop-area { 
-   margin: 2pt; 
-   border: 1pt solid gray;
-   min-height: 30px; min-width: 200px;
+/* ensure that the request section (and request Url box) are a minimum width at startup */
+#requestbox {
+    width: 610px;
 }
-
 #response {
    min-width: 500px;
    min-height: 500px;
@@ -47,10 +45,12 @@ div.drop-area {
    min-height: 300px;
 }
 
-.small-buttons button {
-   padding: 0pt;
+.small-buttons1 button {
    font-size: 75%;
-   margin: 0.05em;
+}
+
+.medium-buttons button {
+    padding: 0pt;
 }
 
 #about {
@@ -62,4 +62,9 @@ div.drop-area {
 #response #title {
    padding: 0.2em;
    padding-left: 0.5em;
+}
+
+/* set background browser to white; by default it is ugly gray */
+#browserIframe {
+    background-color: white;
 }

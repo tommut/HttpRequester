@@ -193,7 +193,6 @@ var App = {
         if (this.getPreferenceBool("showAdvancedOptions")) {
             document.getElementById("advancedSettings1").setAttribute("hidden", false);
             document.getElementById("advancedSettings2").setAttribute("hidden", false);
-            document.getElementById("advancedSettings3").setAttribute("hidden", false);
         }
 
         if (this.getPreferenceBool("prettyPrintResponse")) {
@@ -233,7 +232,6 @@ var App = {
         this.elements["password"] = document.getElementById("password");
         this.elements["content"] = document.getElementById("content");
         this.elements["url"] = document.getElementById("url");
-        this.elements["timeout-slider"] = document.getElementById("timeout-slider");
         this.elements["timeout"] = document.getElementById("timeout");
 
         this.elements["filename"].value = httprequesterService.file;
@@ -246,9 +244,6 @@ var App = {
             this.elements["password"].value = httprequesterService.password;
         }
         var current = this;
-        this.elements["timeout-slider"].onchange = function () {
-            current.elements["timeout"].value = current.elements["timeout-slider"].value;
-        }
         document.getElementById("base64-encode").onclick = function () {
             var value = current.elements["content"].value;
             if (value.length > 0) {
@@ -478,7 +473,10 @@ var App = {
             this.handleGet("GET");
         }
     },
-
+    refreshUrlList: function() {
+        var urlstr = this.elements["url"].value;
+        document.getElementById("tooltiptextval").setAttribute("value", urlstr);
+    },
     deleteURL: function () {
         this.handleGet("DELETE");
     },
@@ -614,7 +612,7 @@ var App = {
             requestToCancel.abort();
          }
          var currentApp = this;
-         var timeout = parseInt(this.elements["timeout-slider"].value)*1000;
+         var timeout = parseInt(this.elements["timeout"].value)*1000;
          var username = this.elements["username"].value;
          var password = this.elements["password"].value;
          var file = this.pathToFile(fpath);
@@ -692,7 +690,7 @@ var App = {
            requestToCancel.abort();
         }
         var currentApp = this;
-        var timeout = parseInt(this.elements["timeout-slider"].value)*1000;
+        var timeout = parseInt(this.elements["timeout"].value)*1000;
         var username = this.elements["username"].value;
         var password = this.elements["password"].value;
 		
@@ -798,9 +796,12 @@ var App = {
 	this.elements["username"].value = request.username ? request.username : "";
 	this.elements["password"].value = request.password ? request.password : "";
 	this.elements["content"].value = request.content ? request.content : "";
-	this.elements["timeout"].value = request.timeout ? request.timeout : "";
-	
-	var methodlist = document.getElementById("method"); 
+	this.elements["timeout"].value = request.timeout ? request.timeout / 1000: "";
+
+    // set tooltip text
+    document.getElementById("tooltiptextval").setAttribute("value", request.url);
+
+	var methodlist = document.getElementById("method");
 	var items = methodlist.firstChild.childNodes;
 	var count =  methodlist.firstChild.childNodes.length;
 	for (var i = 0; i < count; i++) {
@@ -811,13 +812,7 @@ var App = {
 		}
 	}
 	
-//      document.getElementById("base64-encode").onclick = function() {
-//         var value = current.elements["content"].value;
-//         if (value.length>0) {
-//            var encoder = new Base64();
-//            current.elements["content"].value = encoder.encode(value);
-//         }
-	
+
 	// update headers:
 	 // remove all headers:
 	 var treeChildren = document.getElementById("treechildren");
@@ -1152,6 +1147,7 @@ var App = {
 		for (var i = 0; i < listArray.length; i++) {
 			var newUrl = document.createElement("menuitem");
 			newUrl.setAttribute("label", listArray[i]);
+            newUrl.setAttribute("tooltiptext",listArray[i] )
 			urllist.firstChild.appendChild(newUrl);
 		} 
   
@@ -1183,7 +1179,7 @@ var App = {
              requestToCancel.abort();
          }
          var currentApp = this;
-         var timeout = parseInt(this.elements["timeout-slider"].value) * 1000;
+         var timeout = parseInt(this.elements["timeout"].value) * 1000;
          var username = this.elements["username"].value;
          var password = this.elements["password"].value;
 
@@ -1602,15 +1598,10 @@ contentBodyRadioButtonChanged: function() {
       if ( hidden != "true" ) {
           document.getElementById("advancedSettings1").setAttribute("hidden", true);
           document.getElementById("advancedSettings2").setAttribute("hidden", true);
-          document.getElementById("advancedSettings3").setAttribute("hidden", true);
       }
       else {
           document.getElementById("advancedSettings1").setAttribute("hidden", false);
           document.getElementById("advancedSettings2").setAttribute("hidden", false);
-
-          if (this.getPreferenceBool("showAdvancedOptions")) {
-              document.getElementById("advancedSettings3").setAttribute("hidden", false);
-          }
       }
   },
 
