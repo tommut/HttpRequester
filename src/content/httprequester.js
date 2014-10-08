@@ -3,6 +3,7 @@ var XUL_NS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 var mimeService = Components.classes["@mozilla.org/mime;1"].getService(Components.interfaces.nsIMIMEService);
 
 var App = {
+    initialized: false,
     inprogress: null,
     synopsis: null,
     elements: {},
@@ -187,8 +188,14 @@ var App = {
         }
 
     },
+    log : function( msg ) {
+        var cs1 = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
+        cs1.logStringMessage("httprequester: " + msg);
+        console.error(msg)
+    },
 
     init: function () {
+        this.initialized = true;
         // show advanced section if preference is set
         if (this.getPreferenceBool("showAdvancedOptions")) {
             document.getElementById("advancedSettings1").setAttribute("hidden", false);
@@ -201,8 +208,6 @@ var App = {
         }
 
         var group = document.getElementById("responseRenderType");
-        //window.alert( "PREF1: " + this.getPreferenceBool("renderResponseBrowser"))
-
         if (this.getPreferenceBool("renderResponseBrowser")) {
             group.selectedIndex = 0;
         }
@@ -272,7 +277,6 @@ var App = {
 
 
         // load history
-        //pref("extensions.httprequester.history", 25);
         var history = this.getPreferenceComplex("history");
         if (history != null && history.length > 0) {
             this.transactions = JSON.parse(history);
@@ -1542,22 +1546,24 @@ contentBodyRadioButtonChanged: function() {
     }
 },
     responseRenderTypeChanged: function() {
-        var group = document.getElementById("responseRenderType");
+        if (this.initialized) { // don't run during xul startup load
+            var group = document.getElementById("responseRenderType");
 
-        if ( group.selectedIndex == 1 ) {
-            // text
-            this.setPreferenceBool("renderResponseBrowser", false );
-            document.getElementById("browserIframe").setAttribute("hidden", true);
-            document.getElementById("response-content").setAttribute("hidden", false);
+            if (group.selectedIndex == 1) {
+                // text
+                this.setPreferenceBool("renderResponseBrowser", false);
+                document.getElementById("browserIframe").setAttribute("hidden", true);
+                document.getElementById("response-content").setAttribute("hidden", false);
+            }
+            else {
+                this.setPreferenceBool("renderResponseBrowser", true);
+                document.getElementById("browserIframe").setAttribute("hidden", false);
+                document.getElementById("response-content").setAttribute("hidden", true);
+            }
+            // refresh the selected item so that the response can be reloaded
+            // with the new pretty print option
+            App.selectListItem();
         }
-        else {
-            this.setPreferenceBool("renderResponseBrowser", true );
-            document.getElementById("browserIframe").setAttribute("hidden", false);
-            document.getElementById("response-content").setAttribute("hidden", true);
-        }
-        // refresh the selected item so that the response can be reloaded
-        // with the new pretty print option
-        App.selectListItem();
     },
     togglePrettyPrint: function() {
         var oldPrettyPrint = this.getPreferenceBool("prettyPrintResponse");
