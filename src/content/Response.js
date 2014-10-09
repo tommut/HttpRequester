@@ -51,7 +51,7 @@ var Response = {
         }
         var padding = '';
         for (var i = 0; i < pad; i++) {
-            padding += ' ';
+            padding += '    '; // use 4 spaces for tab padding
         }
         formatted += padding + node + '\r\n';
         pad += indent;
@@ -92,6 +92,12 @@ var Response = {
 
         for (var i = 0; i < lines.length; i++) {
             var ln = lines[i];
+            // ignore first line if it is a standalone <!xml> directive
+            if ( i == 0 && ln.indexOf( "<!" ) == 0 || ln.indexOf( "<?" ) == 0 ) {
+                formatted = ln + '\n';
+                continue;
+            }
+
             var single = Boolean(ln.match(/<.+\/>/)); // is this line a single tag? ex. <br />
             var closing = Boolean(ln.match(/<\/.+>/)); // is this a closing tag? ex. </a>
             var opening = Boolean(ln.match(/<[^!].*>/)); // is this even a tag (that's not <!something>)
@@ -168,32 +174,13 @@ var Response = {
 
     log : function( msg ) {
         var cs1 = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
-        cs1.logStringMessage("httprequester: " + msg);
+        cs1.logS
+        tringMessage("httprequester: " + msg);
         console.error(msg)
     },
 
 
     setResponseContent: function(content, contentType, requestUrl) {
-        formattedContent = content;
-        if (formattedContent != null) {
-            var prettyPrint = App.getPreferenceBool("prettyPrintResponse");
-            if (prettyPrint) {
-                // if pretty print is on, format the response before displaying in
-                // response content field
-                if (contentType && contentType.search(/application\/.*json/i) > -1) {
-                    formattedContent = JSON.stringify(JSON.parse(content), null, 4);
-                }
-                else if (contentType && contentType.search(/application\/.*xml/i) > -1) {
-                    formattedContent = this.formatXml(content);
-                }
-                else if (contentType && contentType.search('text/html') > -1) {
-                    // the formatXml method does a better job but does not perform as well
-                    //formattedContent = this.formatXml(content);
-                    formattedContent = this.formatXmlFast(content);
-                }
-            }
-         }
-
         var renderWithBrowser = App.getPreferenceBool("renderResponseBrowser");
         if ( renderWithBrowser ) {
             // if pref is set to checkFileExtension (user may want to turn this off if requests end
@@ -204,17 +191,53 @@ var Response = {
                 fileExtension = this.getFileExtensionFromContentType(contentType);
             }
 
-            var filePath = this.saveResponseToFile(fileExtension, formattedContent);
+            var filePath = this.saveResponseToFile(fileExtension, content);
 
             // need to first change the url (we user a dummy url); otherwise, if navigating
-            // between two XML or HTML files, the URL would be the same and changing it woudl
+            // between two XML or HTML files, the URL would be the same and changing it would
             // do nothing
             document.getElementById("browserIframe").setAttribute("src","file://tmp" );
             document.getElementById("browserIframe").setAttribute("src","file://" + filePath);
 
+            // we do the process again, as it seems on Windows when just setting the src the first
+            // time it would sometimes renders as text (all the text from all xml elements) and not
+            // as XML.  Clearing the src and resetting it a second time seems to always work.
+            document.getElementById("browserIframe").setAttribute("src","file://tmp" );
+            document.getElementById("browserIframe").setAttribute("src","file://" + filePath);
+
+
             //this.log("request: " + requestUrl + "\nIframe: " + document.getElementById("browserIframe").getAttribute("src")  + " \nfilepath: " + filePath);
         }
         else {
+            // output as Text
+            formattedContent = content;
+            if (formattedContent != null) {
+                var prettyPrint = App.getPreferenceBool("prettyPrintResponse");
+                if (prettyPrint) {
+                    // if pretty print is on, format the response before displaying in
+                    // response content field
+                    if (contentType && contentType.search(/.*\/.*json/i) > -1) {
+                        formattedContent = JSON.stringify(JSON.parse(content), null, 4);
+                    }
+                    else if (contentType && contentType.search(/.*\/.*xml/i) > -1) {
+                        // the formatXml method does a better job but does not perform as well as formatXmlFast
+                        var fastPrettyPrint = App.getPreferenceBool("useFastXMLPrettyPrint");
+                        if ( fastPrettyPrint ) {
+                            formattedContent = this.formatXmlFast(content);
+                        }
+                        else {
+                            formattedContent = this.formatXml(content);
+                        }
+                    }
+                    // not currently pretty formatting HTML.  Not sure if it makes sense to do so.
+//                else if (contentType && contentType.search('text/html') > -1) {
+//                    // the formatXml method does a better job but does not perform as well
+//                    //formattedContent = this.formatXml(content);
+//                    formattedContent = this.formatXmlFast(content);
+//                }
+                }
+            }
+
             // update the response content text field
             document.getElementById("response-content").value = formattedContent ? formattedContent : "";
         }

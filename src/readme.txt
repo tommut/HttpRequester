@@ -1,14 +1,16 @@
 HttpRequester is a modified version of the excellent Poster add-on available for Mozilla Firefox.  
 HttpRequester is distributed under the the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
-1.1 (10/7/2014):
+2.0 (10/7/2014):
  Added option to display response in an embedded browser.
   This works well in conjunction with XML Pretty Viewer and JSON View addons.  The embedded browser will utilize the nicely formatted displays that those addons provide.
  Added option to pretty-print JSON and XML responses.
  Added resizable sections to allow individually resizing the request and response areas, as well as the Response Headers and History.
  Added Authentication button to allow for entering username/password for Basic Authentication. his will ensure that the appropriate Authorization header is sent with the request.
  Added PATCH to the list of HTTP methods
- Added tooltip text for request URL list items
+ Added tooltip text for request URL list item
+ Fixed: extra newlines were being being printed for View Raw Transaction causing it to appear double-spaced
+ Fixed: better styling for section headers
 
 1.0.5 (02/02/2014):
  Replaced status-bar (addons bar) icon with a toolbar icon. Toolbar icons can be placed anywhere by right-clicking and selecting "Customize..."

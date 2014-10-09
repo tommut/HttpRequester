@@ -49,8 +49,9 @@
             <row id="advancedSettings2" hidden="true">
                <label value="Timeout"/>
                <hbox flex="1">
-                   <textbox id="timeout" value="30" size="5" flex="1"/>
+                   <textbox id="timeout" value="30" size="5" />
                    <button id="google-login" label="Google Login..." oncommand="App.showGoogleLogin()"/>
+                   <spacer flex="1"/>
                </hbox>
             </row>
          </rows>
@@ -70,7 +71,7 @@
 	      <button label="Submit" tooltiptext="Send the HTTP Request" oncommand="App.doMethodRequest();"/>
 		  <separator orient="vertical" class="groove"/>
 	      <button label="GET" tooltiptext="GET Request" oncommand="App.getURL();"/>
-	      <button label="POST" tooltiptext="POSt Request" oncommand="App.postURL();"/>
+	      <button label="POST" tooltiptext="POST Request" oncommand="App.postURL();"/>
 	      <button label="PUT" tooltiptext="PUT Request" oncommand="App.putURL();"/>
       </hbox>
       <hbox class="medium-buttons">
@@ -166,7 +167,7 @@
    </splitter>
 
     <!-- response area -->
-	<groupbox flex="90" >
+	<groupbox flex="100" >
       	<caption label="Response"/>
 		<vbox style="overflow: auto" flex="100">
            <vbox  style="overflow: auto" flex="100">
@@ -183,7 +184,7 @@
                       </row>
                   </radiogroup>
 
-                  <checkbox id="prettyPrint" label="Pretty print"
+                  <checkbox id="prettyPrint" label="Pretty format"
                             autocheck="false" oncommand="App.togglePrettyPrint();" />
                  <label align="end"  class="small-margin, text-link" value="View raw transaction" onclick="App.viewRawRequest();" crop="end"/>
               </hbox>
@@ -199,7 +200,7 @@
             </splitter>
 
             <vbox style="overflow: auto">
-	         <label value="Headers:"/>
+                <caption label="Headers"/>
 	         <grid flex="1">
 	            <columns>
 	               <column/>
@@ -227,9 +228,9 @@
             		<splitter class="tree-splitter" />
             		<treecol id="dateColumn" label="Date" tooltiptext="Original date of the transaction" flex="10" persist="width ordinal hidden"/>
             		<splitter class="tree-splitter" />
-            		<treecol id="contentLengthColumn" label="ContentLength" tooltiptext="Length of content in bytes" flex="1" persist="width ordinal hidden"/>
+            		<treecol id="contentLengthColumn" label="Size" tooltiptext="Length of content in bytes" flex="1" persist="width ordinal hidden"/>
             		<splitter class="tree-splitter" />
-            		<treecol id="elapsedColumn" label="ElapsedTime" tooltiptext="Elapsed time of request in milliseconds" flex="1" persist="width ordinal hidden"/>
+            		<treecol id="elapsedColumn" label="Time" tooltiptext="Elapsed time of request in milliseconds" flex="1" persist="width ordinal hidden"/>
             		</treecols>
 				<treechildren id="transactiontreechildren" >
 				</treechildren>

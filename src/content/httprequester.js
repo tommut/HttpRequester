@@ -890,6 +890,8 @@ var App = {
 			 		contentLength = response.content.length;
 			 	}
 			 }
+             // add B units (for bytes); similar to browser dev tools
+             contentLength = contentLength + " " + "B";
 	         contentLengthCell.setAttribute("label",contentLength);
 			 
 			 // add elapsed time:
@@ -1336,48 +1338,47 @@ insertIntoArray: function( transaction, position, transactions, maxcount) {
 		//transactionStr += this.getDateString(transaction.timeStamp) + "\r\n";
 		
 		//transactionStr += "REQUEST ---> :" + "\r\n";
-		transactionStr += request.httpMethod + " " + request.url + "\r\n";
+		transactionStr += request.httpMethod + " " + request.url + "\n";
 		
 		//transactionStr += "Request Headers:" + "\r\n";
 		for (var name in request.requestHeaders) {
 			//transactionStr += " ";
-			transactionStr += name + ": " + request.requestHeaders[name] + "\r\n";
+			transactionStr += name + ": " + request.requestHeaders[name] + "\n";
 		}
-		//transactionStr += "\r\n";
+		//transactionStr += "\n";
 		
 		if (request.contentType != null) {
-			transactionStr += "Content-Type: " +  request.contentType + "\r\n";
+			transactionStr += "Content-Type: " +  request.contentType + "\n";
 		}
 		if (request.filename != null) {
-			transactionStr += "Filename: " +  request.filename + "\r\n";
+			transactionStr += "Filename: " +  request.filename + "\n";
 		}
 		if (request.username != null && request.username.length > 0 ) {
-			transactionStr += "Username: " +  request.username + "\r\n";
+			transactionStr += "Username: " +  request.username + "\n";
 		}
 		
 		if (request.content != null) {
-			//transactionStr += "Request body:" + "\r\n";
+			//transactionStr += "Request body:" + "\n";
 			transactionStr += request.content;
 		}
-		transactionStr += "\r\n";
-		transactionStr += "\r\n";
-		
+		transactionStr += "\n";
+
 		if (response != null) {
-			//transactionStr += "<--- RESPONSE:" + "\r\n";
-			transactionStr += " -- response --" + "\r\n";
-			transactionStr += response.status + " " + response.statusText + "\r\n";
-			//transactionStr += "Response Headers:" + "\r\n";
+			//transactionStr += "<--- RESPONSE:" + "\n";
+			transactionStr += " -- response --" + "\n";
+			transactionStr += response.status + " " + response.statusText + "\n";
+			//transactionStr += "Response Headers:" + "\n";
 			
 			for (var name in response.responseHeaders) {
 				//transactionStr += " ";
-				transactionStr += name + ": " + response.responseHeaders[name] + "\r\n";
+				transactionStr += name + ": " + response.responseHeaders[name] + "\n";
 			}
-			//transactionStr += "\r\n";
-			//transactionStr += "Response body:" + "\r\n";
+			//transactionStr += "\n";
+			//transactionStr += "Response body:" + "\n";
 			if (response.content != null) {
-				transactionStr += response.content;
+				transactionStr += "\n" + response.content;
 			}
-			transactionStr += "\r\n";
+			transactionStr += "\n";
 		}
 	  }
 	  return transactionStr;
@@ -1397,37 +1398,36 @@ insertIntoArray: function( transaction, position, transactions, maxcount) {
 			}
 		}
 	  }
-		
-	  
+
 	  if (transaction != null) {
 		
 		var request = transaction.requestTransaction;
 		var response = transaction.responseTransaction;
 		
-		//transactionStr += this.getDateString(transaction.timeStamp) + "\r\n";
+		//transactionStr += this.getDateString(transaction.timeStamp) + "\n";
 		
-		//transactionStr += "REQUEST ---> :" + "\r\n";
-		transactionStr += request.httpMethod + " " + request.url + "\r\n";
+		//transactionStr += "REQUEST ---> :" + "\n";
+		transactionStr += request.httpMethod + " " + request.url + "\n";
 		
-		//transactionStr += "Request Headers:" + "\r\n";
+		//transactionStr += "Request Headers:" + "\n";
 		for (var name in request.requestHeaders) {
 			//transactionStr += " ";
-			transactionStr += name + ": " + request.requestHeaders[name] + "\r\n";
+			transactionStr += name + ": " + request.requestHeaders[name] + "\n";
 		}
-		//transactionStr += "\r\n";
+		//transactionStr += "\n";
 		
 		if (request.contentType != null) {
-			transactionStr += "Content-Type: " +  request.contentType + "\r\n";
+			transactionStr += "Content-Type: " +  request.contentType + "\n";
 		}
 		if (request.filename != null) {
-			transactionStr += "Filename: " +  request.filename + "\r\n";
+			transactionStr += "Filename: " +  request.filename + "\n";
 		}
 		if (request.username != null && request.username.length > 0 ) {
-			transactionStr += "Username: " +  request.username + "\r\n";
+			transactionStr += "Username: " +  request.username + "\n";
 		}
 		
 		if (request.content != null) {
-			//transactionStr += "Request body:" + "\r\n";
+			//transactionStr += "Request body:" + "\n";
 			transactionStr += request.content;
 		}
 
@@ -1777,7 +1777,7 @@ executeRawRequest: function( requestStr ) {
 				// add to text body
 				content = content + readIn;
 				if ( index + 1 < textLines.length ) {
-					content += "\r\n";
+					content += "\n";
 				}
 			}
 			index++;
