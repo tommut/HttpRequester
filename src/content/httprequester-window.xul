@@ -22,7 +22,7 @@
     </tooltip>
    <vbox flex="3">
    <hbox flex="3">
-   	  <groupbox flex="2" id="requestbox">
+   	  <groupbox flex="2" id="requestbox" persist="width">
        <caption label="Request"/>
    	<vbox flex="3">
       <grid>
@@ -173,7 +173,7 @@
            <vbox  style="overflow: auto" flex="100">
               <description id="title"/>
               <hbox>
-                 <label value="Status:"/>
+                 <label id="statusHeading" value="Status:"/>
                  <label id="code" value=""/>
                  <spacer flex="1"/>
 
@@ -191,7 +191,7 @@
               <!--<separator orient="horizontal" class="groove"/>-->
               <vbox minheight="100px" flex="3">
                   <textbox id="response-content" multiline="true" flex="3"/>
-                  <iframe id="browserIframe" flex="1" />
+                  <iframe id="browserIframe" type="content" flex="1" />
               </vbox>
             </vbox>
 

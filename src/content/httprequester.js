@@ -545,7 +545,7 @@ var App = {
     },
 
     pathToFile: function (path) {
-        var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+        var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsIFile);
         file.initWithPath(path);
         return file;
     },
@@ -1103,7 +1103,10 @@ var App = {
 		
 		// update menu
 		this.updateMenuList( "url", this.urlHistory );
-		// end url
+
+        // select new url in the list (as addTransactionToList() selects the previous one)
+        this.elements["url"].value = request.url ? request.url : "";
+        // end url
 		
 		// update content type
 		if (request.contentType != null && request.contentType.length > 0) {

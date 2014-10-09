@@ -10,11 +10,9 @@ caption {
     font-variant: small-caps;
 }
 
-/*#headers*/
-/*{*/
-    /*padding-left: 0px !important;  padding-right: 0px !important;*/
-    /*padding-top: 0px !important; padding-bottom: 0px !important;*/
-/*}*/
+#statusHeading {
+    font-weight: bold;
+}
 
 #httprequesterSidebar {
    overflow: scroll;

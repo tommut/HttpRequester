@@ -7,6 +7,7 @@ HttpRequester is distributed under the the BSD License: http://www.opensource.or
  Added option to pretty-print JSON and XML responses.
  Added resizable sections to allow individually resizing the request and response areas, as well as the Response Headers and History.
  Added Authentication button to allow for entering username/password for Basic Authentication. his will ensure that the appropriate Authorization header is sent with the request.
+ You can also set the timeout value to determine how long to wait before the request times out  (Default: 30 seconds)
  Added PATCH to the list of HTTP methods
  Added tooltip text for request URL list item
  Fixed: extra newlines were being being printed for View Raw Transaction causing it to appear double-spaced
