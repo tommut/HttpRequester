@@ -2,7 +2,7 @@
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
 <?xml-stylesheet href="chrome://httprequester/skin/default.css" type="text/css"?>
 <page id="httprequester-window" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" 
-   title="HttpRequester" persist="width height"  width="1000px" height="750px"
+   title="HttpRequester" persist="width height"
    xmlns:h="http://www.w3.org/1999/xhtml" flex="1" onload="App.init()"
    windowtype="window:httprequester"
    onunload="App.saveSettings();">

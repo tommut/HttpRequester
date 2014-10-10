@@ -1,6 +1,6 @@
 #httprequester-window {
    min-width: 450px;
-   width: 1024px;
+   width: 1200px;
    height: 768px;
    overflow: auto;
 }
@@ -40,7 +40,7 @@ p.label {
 
 /* ensure that the request section (and request Url box) are a minimum width at startup */
 #requestbox {
-    width: 610px;
+    width: 400px;
 }
 #response {
    min-width: 500px;
