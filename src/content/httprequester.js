@@ -1037,6 +1037,8 @@ var App = {
 		 		contentLength = response.content.length;
 		 	}
 		 }
+         // add B units (for bytes); similar to browser dev tools
+         contentLength = contentLength + " " + "B";
          contentLengthCell.setAttribute("label",contentLength);
          
           // add elapsed time:

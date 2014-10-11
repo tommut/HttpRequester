@@ -14,6 +14,11 @@ caption {
     font-weight: bold;
 }
 
+/* set tooltip max-width to none so that it does not crop when it gets too large */
+#httprequesterTooltip {
+    max-width: none;
+}
+
 #httprequesterSidebar {
    overflow: scroll;
 }
