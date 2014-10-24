@@ -1,6 +1,6 @@
 HttpRequester
 =============
-HttpRequester is a tool for easily making HTTP requests (GET/PUT/POST/DELETE), viewing the responses, and keeping a history of transactions.
+HttpRequester is a tool for Firefox for easily making HTTP requests (GET/PUT/POST/DELETE), viewing the responses, and keeping a history of transactions.
 
 This tool is useful when doing web or REST development, or when you need to make HTTP requests that are not easily done via the browser (PUT/POST/DELETE).
 
