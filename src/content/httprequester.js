@@ -194,6 +194,36 @@ var App = {
         console.error(msg)
     },
 
+    updateParamsFromUri: function() {
+        // remove params
+        treeChildren = document.getElementById("paramtreechildren");
+        if ( treeChildren != null && treeChildren.childNodes.length > 0 ) {
+            while (treeChildren.hasChildNodes()) {
+                treeChildren.removeChild(treeChildren.firstChild);
+            }
+        }
+
+        var urlstr = this.elements["url"].value;
+
+        var url1 = new URL(urlstr);
+        var paramStr = url1.search;
+        if ( paramStr != null && paramStr.length > 0 ) {
+            // Convert query string to object
+            var queries = paramStr.replace(/^\?/, '').split('&');
+            for( i = 0; i < queries.length; i++ ) {
+                var split = queries[i].split('=');
+                var paramName = split[0];
+                var paramValue= split[1];
+                // decode value from URL params (we encode when we add the params to the uri)
+                if ( paramValue ) {
+                    paramValue = decodeURIComponent(paramValue);
+                }
+                this.addParameter(paramName, paramValue);
+                // .request
+            }
+        }
+    },
+
     init: function () {
         this.initialized = true;
         // show advanced section if preference is set
@@ -214,21 +244,13 @@ var App = {
         else {
             group.selectedIndex =1;
         }
-        //window.alert( "GROUP: " + group.selectedIndex + " PREF: " + this.getPreferenceBool("renderResponseBrowser"))
 
         // There was a component that handled storing some values; this no longer works
         // in Firefox 4, so was removed.  The values are instead stored to the preferences.
         var httprequesterService = new Object();
-        //alert("Initializing with "+httprequesterService);
-        //if (!httprequesterService.contentType) {
         httprequesterService.contentType = this.getPreferenceString("contentType");
-        //}
-        //if (!httprequesterService.contentType) {
         httprequesterService.contentType = "text/xml";
-        //}
-        //if (!httprequesterService.url) {
         httprequesterService.url = this.getPreferenceString("url");
-        //}
         httprequesterService.file = "";
 
         this.elements["filename"] = document.getElementById("filename");
@@ -256,16 +278,33 @@ var App = {
                 current.elements["content"].value = encoder.encode(value);
             }
         }
+
         document.getElementById("header-list").onkeypress = function (event) {
-            if (event.keyCode == 8 || event.keyCode == 46) {
-                current.onDeleteHeader();
-            }
+            // don't listen for delete key, as it interferes with pressing delete on the editable field
+//            if (event.keyCode == 8 || event.keyCode == 46) {
+//                current.onDeleteHeader();
+//            }
         };
+
+        document.getElementById("url").onblur = function (event) {
+            App.updateParamsFromUri();
+        };
+
         document.getElementById("parameter-list").onkeypress = function (event) {
-            if (event.keyCode == 8 || event.keyCode == 46) {
-                current.onDeleteParameter();
+            // don't listen for delete key, as it interferes with pressing delete on the editable field
+//            if (event.keyCode == 8 || event.keyCode == 46) {
+//                current.onDeleteParameter();
+//            }
+            if (event.keyCode == 13 ) { // if return key is pressed, means param was edited.  Update URL
+               this.updateUrlWithParams();
             }
         };
+
+        // listen for editable changes in the parameter list so we can update the URL
+        document.getElementById("parameter-list").onblur = function (event) {
+            App.updateUrlWithParams();
+        };
+
         document.getElementById("transaction-list").onkeypress = function (event) {
             if (event.keyCode == 8 || event.keyCode == 46) {
                 current.onDeleteTransaction();
@@ -443,6 +482,8 @@ var App = {
             this.headURL();
         } else if (method == "OPTIONS") {
             this.optionsURL();
+        } else if (method == "PATCH") {
+            this.sendCustomCommand(method)
         }
         else {
             // custom methods
@@ -480,6 +521,8 @@ var App = {
     refreshUrlList: function() {
         var urlstr = this.elements["url"].value;
         document.getElementById("tooltiptextval").setAttribute("value", urlstr);
+
+        App.updateParamsFromUri();
     },
     deleteURL: function () {
         this.handleGet("DELETE");
@@ -499,6 +542,30 @@ var App = {
         this.handleGet(method);
     },
 
+
+
+    updateUrlWithParams: function() {
+        // trim parameters from URI to add them
+        var urlstr = this.elements["url"].value;
+        if ( urlstr == null ) {
+            urlstr = "";
+        }
+        urlstr = urlstr.trim();
+        var index = urlstr.indexOf("?");
+        if ( index > -1 ) {
+            urlstr = urlstr.substr(0, index);
+        }
+
+        if ( urlstr.lastIndexOf( "/" ) == urlstr.length -1 ) {
+            urlstr = urlstr.substring(0, urlstr.length-1)
+        }
+
+        urlstr = this.addParametersToURI(urlstr);
+
+        // now set url
+        this.elements["url"].value = urlstr;
+    },
+
     handleSend: function (method) {
         var fpath = this.elements["filename"].value;
         var content = this.elements["content"].value;
@@ -508,8 +575,6 @@ var App = {
             this.elements["contentType"].value = "text/xml";
             ctype = "text/xml";
         }
-
-        urlstr = this.addParametersToURI(urlstr);
 
         if (urlstr.length == 0) {
             alert("A URL must be specified.");
@@ -537,8 +602,6 @@ var App = {
                 urlstr = "http://" + urlstr;
             }
 
-            urlstr = this.addParametersToURI(urlstr);
-
             this.synopsis = method + " on " + urlstr;
             this.getContentFromURL(urlstr, method);
         }
@@ -550,28 +613,33 @@ var App = {
         return file;
     },
 
-    addParametersToURI: function (urlstr) {
+    addParametersToURI: function (urlstr) {  //
         var needSeparator = false;
         var parameters = this.getParametersFromUI();
         for (var name in parameters) {
-            if (needSeparator) {
-                urlstr += "&";
-            } else {
-                if (urlstr.indexOf('?') < 0) {
-                    urlstr += "?";
+            var valArray = parameters[name];
+            for ( var i = 0; i < valArray.length; i++ ) {
+                var paramValue = valArray[i];
+
+                if (needSeparator) {
+                    urlstr += "&";
+                } else {
+                    if (urlstr.indexOf('?') < 0) {
+                        urlstr += "?";
+                    }
+                    else {
+                        urlstr += "&";
+                    }
+                }
+                var val = encodeURIComponent(paramValue);
+                if (val != null && val.length > 0) {
+                    urlstr += name + "=" + val;
                 }
                 else {
-                    urlstr += "&";
+                    urlstr += name;
                 }
+                needSeparator = true;
             }
-            var val = encodeURIComponent(parameters[name]);
-            if (val != null && val.length > 0) {
-                urlstr += name + "=" + val;
-            }
-            else {
-                urlstr += name;
-            }
-            needSeparator = true;
         }
         return urlstr;
     },
@@ -684,9 +752,44 @@ var App = {
       
    },
 
+    moveParamUp : function() {
+        var treeChildren = document.getElementById("paramtreechildren");
+        var indices = this.getAllSelectedIndices("paramtreechildren", "parameter-list" );
+        //for ( var i = indices.length-1; i >= 0; i-- ) {
+        for ( var i = 0; i < indices.length;  i++ ) {
+            var selectedParamIndex = indices[i];
+            if ( selectedParamIndex >= 1 ) {
+                var selectedTreeItem = treeChildren.childNodes[selectedParamIndex];
+                var previousItem = treeChildren.childNodes[selectedParamIndex-1];
+                treeChildren.removeChild(selectedTreeItem);
+                treeChildren.insertBefore(selectedTreeItem, previousItem);
+
+                var treeSelection = document.getElementById("parameter-list").view.selection;
+                treeSelection.select(selectedParamIndex-1);
+            }
+        }
+
+        this.updateUrlWithParams();
+    },
+
+
+    moveParamDown: function() {
+        var treeChildren = document.getElementById("paramtreechildren");
+        var indices = this.getAllSelectedIndices("paramtreechildren", "parameter-list" );
+        for ( var i = indices.length-1; i >= 0; i-- ) {
+            var selectedParamIndex = indices[i];
+            if ( selectedParamIndex < treeChildren.childNodes.length - 1 ) {
+                var selectedTreeItem = treeChildren.childNodes[selectedParamIndex];
+                var nextItem = treeChildren.childNodes[selectedParamIndex+1];
+                treeChildren.removeChild(nextItem);
+                treeChildren.insertBefore( nextItem, selectedTreeItem);
+            }
+        }
+        this.updateUrlWithParams();
+    },
+
    
   sendContentToURL: function(urlstr,method,content,ctype) {
-     //alert(urlstr+" "+method+" "+content+" "+ctype);
      try{
         if (this.inprogress) {
            var requestToCancel = this.inprogress;
@@ -829,18 +932,8 @@ var App = {
 	 	var value = request.requestHeaders[name];
 	 	this.addRequestHeader(name, value);
 	 }
-	 
-	 // remove parameters
-	treeChildren = document.getElementById("paramtreechildren");
-	 if ( treeChildren != null && treeChildren.childNodes.length > 0 ) {
-		 while (treeChildren.hasChildNodes()) {
-			 treeChildren.removeChild(treeChildren.firstChild);
-		}
-	 }
-	 for (var name in request.parameters) {
-	 	var value = request.parameters[name];
-	 	this.addParameter(name, value);
-	 }
+
+     this.updateParamsFromUri();
 	
 
   },
@@ -1668,8 +1761,41 @@ getMethod: function (readIn ) {
 	else if (readIn.indexOf("OPTIONS") == 0) {
 		method = "OPTIONS";
 	}
+    else if (readIn.indexOf("PATCH") == 0) {
+        method = "PATCH";
+    }
 	else {
-		method = readIn;
+        // load custom methods
+        var sendCommands = this.getPreferenceString("http.methods.custom.write");
+        if (sendCommands != null && sendCommands.length > 0) {
+            this.customWriteHttpMethods = JSON.parse(sendCommands);
+        }
+        else {
+            this.customWriteHttpMethods = new Array();
+        }
+        var readCommands = this.getPreferenceString("http.methods.custom.read");
+        if (readCommands != null && readCommands.length > 0) {
+            this.customReadHttpMethods = JSON.parse(readCommands);
+        }
+        else {
+            this.customReadHttpMethods = new Array();
+        }
+
+        // populate METHOD dropdown with custom methods
+        for (var i = 0; i < this.customWriteHttpMethods.length && method == null; i++) {
+            if (readIn.indexOf(this.customWriteHttpMethods[i]) == 0) {
+                method = this.customWriteHttpMethods[i];
+            }
+        }
+        for (var i = 0; i < this.customReadHttpMethods.length && method == null; i++) {
+            if (readIn.indexOf(this.customReadHttpMethods[i]) == 0) {
+                method = this.customReadHttpMethods[i];
+            }
+        }
+
+        if ( method == null ) {
+            method = readIn;
+        }
 	}
 	return method;
 },
@@ -1880,17 +2006,23 @@ executeRawRequest: function( requestStr ) {
 	 }
 	 
      for (var name in parameters) {
-        if (body.length>0) {
-           body += "&";
-        }
-		
-		var val = encodeURIComponent(parameters[name]);
-		if ( val != null && val.length > 0 ) { 
-      	   body += name+"="+ val;
-		 }
-		 else {
-			 body += name;
-		}
+         var valArray = parameters[name];
+         for ( var i = 0; i < valArray.length; i++ ) {
+             var paramValue = valArray[i];
+
+
+             if (body.length > 0) {
+                 body += "&";
+             }
+
+             var val = encodeURIComponent(paramValue);
+             if (val != null && val.length > 0) {
+                 body += name + "=" + val;
+             }
+             else {
+                 body += name;
+             }
+         }
      }
      this.elements["content"].value = body;
      
@@ -2055,7 +2187,8 @@ selectHeader :function (event) {
    	 } catch (ex) {
          alert(ex);
       }
-   	
+
+
    },
    onDeleteHeader: function() {
     var treeChildren = document.getElementById("treechildren");
@@ -2099,24 +2232,33 @@ selectHeader :function (event) {
          return;
       }
       var value = document.getElementById("parameter-value").value;
-      //this.parameters[name] = value;
       this.addParameter(name,value);
+
+      this.updateUrlWithParams();
+
+
    },
    addParameter: function(name,value) {
     var item = null;
    	var treeChildren = document.getElementById("paramtreechildren");
 	var treeitems = treeChildren.childNodes;
 	
-	try { 
-		for (var i=0; i < treeitems.length; i++) {
-			item = treeitems[i];
-			var nameCell = item.getElementsByTagName('treecell').item(0);
-	         if (nameCell.getAttribute('label')==name) {
-	            break;
-	         }
-	         item = null;
-		}
-		
+	try {
+        // You can have multiple parameters - so we won't update existing ones; this can be done
+        // via direct editing of cells
+//		for (var i=0; i < treeitems.length; i++) {
+//			item = treeitems[i];
+//			var nameCell = item.getElementsByTagName('treecell').item(0);
+//	         if (nameCell.getAttribute('label')==name) {
+//	            break;
+//	         }
+//	         item = null;
+//		}
+
+        if ( value == null ) {
+            value = "";
+        }
+
 		// adding new item
 	   	if ( !item ) {
 	   		var treeChildren = document.getElementById("paramtreechildren"); 
@@ -2159,7 +2301,14 @@ selectHeader :function (event) {
 	         var name = nameCell.getAttribute('label');
 			 var valueCell = cells.item(1);
 	         var value = valueCell.getAttribute('label');
-	         parametersFromUI[name] = value;
+
+             var valArray = parametersFromUI[name];
+            if ( !valArray ) {
+                valArray = [];
+             }
+            valArray[valArray.length] = value;
+
+	         parametersFromUI[name] = valArray;
 		 }
       } catch (ex) {
          alert(ex);
@@ -2209,6 +2358,7 @@ selectHeader :function (event) {
 			treeChildren.removeChild(selectedTreeItem);
 		}
 	 }
+     this.updateUrlWithParams();
    }
 }
 
