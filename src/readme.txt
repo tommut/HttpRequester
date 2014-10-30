@@ -8,6 +8,8 @@ Improved parameters - the parameters list is now automatically populated when vi
 The parameters and URI are now synchronized -adding/modifying parameters in the list automatically updates the parameters in the URI,
 and vice-versa: if you add/modify the parameters directly in the URL they will be reflected in the parameters list.
 
+Now handle multi-select for Deleing transactions and doing copy-to-clipboard
+
 Fixed: PATCH was not working
 Fixed: couldn't execute custom Methods from the Raw Request dialog
 
