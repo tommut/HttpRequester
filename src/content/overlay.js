@@ -34,7 +34,7 @@ httprequester.start = function () {
         } catch (e) {
             firstrun = true;
         }
-        var curVersion = "2.0";
+        var curVersion = "2.1";
 
 
         if (firstrun) {

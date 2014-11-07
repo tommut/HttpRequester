@@ -6,7 +6,7 @@
   
     <em:id>{ea4637dc-e014-4c17-9c2c-879322d23268}</em:id>
     <em:name>HttpRequester</em:name>
-    <em:version>2.0</em:version>
+    <em:version>2.1</em:version>
     <em:type>2</em:type>
     <em:description>A tool for easily making HTTP requests (GET/PUT/POST/DELETE), and keeping a history of transactions.</em:description>
     <em:creator>Tom Mutdosch</em:creator>

@@ -174,8 +174,7 @@ var Response = {
 
     log : function( msg ) {
         var cs1 = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
-        cs1.logS
-        tringMessage("httprequester: " + msg);
+        cs1.logStringMessage("httprequester: " + msg);
         console.error(msg)
     },
 
@@ -191,6 +190,11 @@ var Response = {
                 fileExtension = this.getFileExtensionFromContentType(contentType);
             }
 
+            // if there's no actual content, default to txt
+            if ( content == null || content.length == 0 ) {
+                fileExtension = "txt";
+            }
+
             var filePath = this.saveResponseToFile(fileExtension, content);
 
             // need to first change the url (we user a dummy url); otherwise, if navigating
@@ -204,14 +208,12 @@ var Response = {
             // as XML.  Clearing the src and resetting it a second time seems to always work.
             document.getElementById("browserIframe").setAttribute("src","file://tmp" );
             document.getElementById("browserIframe").setAttribute("src","file://" + filePath);
-
-
-            //this.log("request: " + requestUrl + "\nIframe: " + document.getElementById("browserIframe").getAttribute("src")  + " \nfilepath: " + filePath);
+//            this.log("request: " + requestUrl + "\nIframe: " + document.getElementById("browserIframe").getAttribute("src")  + " \nfilepath: " + filePath);
         }
         else {
             // output as Text
             formattedContent = content;
-            if (formattedContent != null) {
+            if (formattedContent != null && formattedContent.length > 0) {
                 var prettyPrint = App.getPreferenceBool("prettyPrintResponse");
                 if (prettyPrint) {
                     // if pretty print is on, format the response before displaying in

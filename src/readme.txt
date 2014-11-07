@@ -12,7 +12,7 @@ Now handle multi-select for Deleing transactions and doing copy-to-clipboard
 
 Fixed: PATCH was not working
 Fixed: couldn't execute custom Methods from the Raw Request dialog
-
+Fixed: Response pane would not update if empty contents were returned for an XML/JSON response.
 
 2.0 (10/7/2014):
  Added option to display response in an embedded browser.
