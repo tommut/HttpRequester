@@ -249,7 +249,7 @@ var App = {
         // in Firefox 4, so was removed.  The values are instead stored to the preferences.
         var httprequesterService = new Object();
         httprequesterService.contentType = this.getPreferenceString("contentType");
-        httprequesterService.contentType = "text/xml";
+        httprequesterService.contentType = "application/json";
         httprequesterService.url = this.getPreferenceString("url");
         httprequesterService.file = "";
 
@@ -564,6 +564,9 @@ var App = {
 
         // now set url
         this.elements["url"].value = urlstr;
+
+        // update tooltip in URL dropdown
+        document.getElementById("tooltiptextval").setAttribute("value", urlstr);
     },
 
     handleSend: function (method) {
@@ -572,8 +575,8 @@ var App = {
         var urlstr = this.elements["url"].value;
         var ctype = this.elements["contentType"].value;
         if (ctype.length == 0) {
-            this.elements["contentType"].value = "text/xml";
-            ctype = "text/xml";
+            this.elements["contentType"].value = "application/json";
+            ctype = "application/json";
         }
 
         if (urlstr.length == 0) {

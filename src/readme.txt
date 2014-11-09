@@ -2,17 +2,23 @@ HttpRequester is a modified version of the excellent Poster add-on available for
 HttpRequester is distributed under the the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
 2.1:
+Improved parameter handling:
+The parameters list is now automatically populated when viewing requests in the history.
+The parameters and URI are now synchronized.  Adding/modifying parameters in the list automatically updates the parameters in the URI,
+and vice-versa: if you add/modify the parameters directly in the URL they will be reflected in the parameters list.
+You can now move parameters up or down in the list, and the URL will automatically reflect the positioning.
+
 Can now directly edit Header and Parameter names and values in the List.  Simply double click to edit the field.
 
-Improved parameters - the parameters list is now automatically populated when viewing requests in the history.can now move parameters up or down in the list.
-The parameters and URI are now synchronized -adding/modifying parameters in the list automatically updates the parameters in the URI,
-and vice-versa: if you add/modify the parameters directly in the URL they will be reflected in the parameters list.
+Multi-select is now supported in the History view for deleting multiple transactions, as well as selecting multiple
+ transactions to copy-to-clipboard.
+Multi-select is also supported in the Headers and Parameters list for deleting/reordering multiple selections
+at one time.
 
-Now handle multi-select for Deleing transactions and doing copy-to-clipboard
-
-Fixed: PATCH was not working
+Fixed: PATCH method was not working.
 Fixed: couldn't execute custom Methods from the Raw Request dialog
 Fixed: Response pane would not update if empty contents were returned for an XML/JSON response.
+
 
 2.0 (10/7/2014):
  Added option to display response in an embedded browser.
