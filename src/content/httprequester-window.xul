@@ -141,10 +141,11 @@
 			   
 			   <label value="Value:"/><textbox id="header-value" flex="2"/><button label="Add" oncommand="App.onAddChangeHeader()"/>
             </hbox>
+            <separator orient="horizontal" class="groove"/>
             <hbox flex="1">
               <tree id="header-list" flex="1" enableColumnDrag="true" hidecolumnpicker="true"  editable="true">
 				<treecols>
-					<treecol id="headerName" label="Name" flex="8" ignoreincolumnpicker="true" persist="width ordinal"  />
+					<treecol id="headerName" label="Name" flex="5" ignoreincolumnpicker="true" persist="width ordinal"  />
 					<splitter class="tree-splitter" />
             		<treecol id="headerValue" label="Value" flex="8" ignoreincolumnpicker="true" persist="width ordinal"  />
            		</treecols>
@@ -172,10 +173,11 @@
                <label value="Name:"/>
                <textbox id="parameter-name"  flex="1"/><label value="Value:"/><textbox id="parameter-value" flex="2"/><button label="Add" oncommand="App.onAddChangeParameter()"/>
             </hbox>
+           <separator orient="horizontal" class="groove"/>
            <hbox flex="1">
                 <tree id="parameter-list" flex="1" enableColumnDrag="true" hidecolumnpicker="true" editable="true" >
                     <treecols>
-                        <treecol id="paramName" label="Name" flex="8" ignoreincolumnpicker="true" persist="width ordinal"  />
+                        <treecol id="paramName" label="Name" flex="5" ignoreincolumnpicker="true" persist="width ordinal"  />
                         <splitter class="tree-splitter" />
                         <treecol id="paramValue" label="Value" flex="8" ignoreincolumnpicker="true" persist="width ordinal"  />
                     </treecols>
@@ -228,7 +230,11 @@
               </vbox>
             </vbox>
 
-            <!-- draggable splitter between response content and headers section -->
+            <!-- draggable splitter between response content and
+
+
+
+            headers section -->
             <splitter resizeAfter="flex">
             </splitter>
 
