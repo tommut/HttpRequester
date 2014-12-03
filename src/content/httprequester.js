@@ -588,9 +588,19 @@ var App = {
         } else if (fpath.length != 0 && content.length != 0) {
             alert("You can't have both a file and content to send.");
         } else if (fpath.length != 0) {
+            // add default protocol if not set
+            if (urlstr.indexOf("://") == -1) {
+                urlstr = "http://" + urlstr;
+            }
+
             this.synopsis = method + " on " + urlstr;
             this.sendFileToURL(urlstr, method, fpath, ctype);
         } else {
+            // add default protocol if not set
+            if (urlstr.indexOf("://") == -1) {
+                urlstr = "http://" + urlstr;
+            }
+
             this.synopsis = method + " on " + urlstr;
             this.sendContentToURL(urlstr, method, content, ctype);
         }
@@ -868,7 +878,7 @@ var App = {
      }
   },
   selectListItem: function() {
-  		var selectedTreeItemIndex = document.getElementById("transaction-list").currentIndex; 
+  		var selectedTreeItemIndex = document.getElementById("transaction-list").currentIndex;
 		if ( selectedTreeItemIndex >= 0 ) {
 			var treeChildren = document.getElementById("transactiontreechildren");
 			if ( treeChildren != null ) {
@@ -2041,10 +2051,9 @@ executeRawRequest: function( requestStr ) {
          }
      }
      this.elements["content"].value = body;
-     
-     
-     
-     
+
+     // update URL, as the params have been removed from URI to go to the form body
+     this.updateUrlWithParams();
   },
   clearRequest : function() {
 	this.clearRequestView();
