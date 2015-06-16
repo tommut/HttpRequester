@@ -205,8 +205,16 @@ var App = {
 
         var urlstr = this.elements["url"].value;
 
-        var url1 = new URL(urlstr);
-        var paramStr = url1.search;
+        var paramStr;
+        try {
+            //Support after Gecko 26
+            var url1 = new URL(urlstr);
+            paramStr = url1.search;
+        } catch (ex) {
+            var url = document.createElement('a');
+            url.href = urlstr;
+            paramStr = url.search;
+        }
         if ( paramStr != null && paramStr.length > 0 ) {
             // Convert query string to object
             var queries = paramStr.replace(/^\?/, '').split('&');
