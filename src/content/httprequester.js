@@ -211,9 +211,11 @@ var App = {
             var url1 = new URL(urlstr);
             paramStr = url1.search;
         } catch (ex) {
-            var search = urlstr.replace(/^\s+/,'').replace(/\s+$/,'').match(/([^?#]*)(#.*)?$/);
-            if(search){
-                paramStr = search[1];
+            if (urlstr.indexOf("?") != -1) {
+                var search = urlstr.replace(/^\s+/,'').replace(/\s+$/,'').match(/([^?#]*)(#.*)?$/);
+                if(search){
+                    paramStr = search[1];
+                }
             }
         }
         if ( paramStr != null && paramStr.length > 0 ) {
