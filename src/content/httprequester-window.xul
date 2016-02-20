@@ -200,56 +200,50 @@
    <!-- draggable splitter between left/right request/response sections -->
    <splitter collapse="after" resizeAfter="farthest">
    </splitter>
+   <tabbox id="reponse-tabs" flex="2">
+     <tabs>
+       <tab>Body</tab>
+       <tab>Headers</tab>
+     </tabs>
+     <tabpanels flex="2">
+       <!-- response area -->
+       <vbox  style="overflow: auto" flex="100">
+         <description id="title"/>
+         <hbox>
+           <label id="statusHeading" value="Status:"/>
+           <label id="code" value=""/>
+           <spacer flex="1"/>
 
-    <!-- response area -->
-	<groupbox flex="100" >
-      	<caption label="Response"/>
-		<vbox style="overflow: auto" flex="100">
-           <vbox  style="overflow: auto" flex="100">
-              <description id="title"/>
-              <hbox>
-                 <label id="statusHeading" value="Status:"/>
-                 <label id="code" value=""/>
-                 <spacer flex="1"/>
+           <radiogroup id="responseRenderType" onselect="App.responseRenderTypeChanged()">
+             <row align="center">
+               <radio group="position" label="Browser" value="0"  />
+               <radio group="position" label="Text" value="1" />
+             </row>
+           </radiogroup>
 
-                  <radiogroup id="responseRenderType" onselect="App.responseRenderTypeChanged()">
-                      <row align="center">
-                          <radio group="position" label="Browser" value="0"  />
-                          <radio group="position" label="Text" value="1" />
-                      </row>
-                  </radiogroup>
+           <checkbox id="prettyPrint" label="Pretty format"
+             autocheck="false" oncommand="App.togglePrettyPrint();" />
+           <label align="end"  class="small-margin, text-link" value="View raw transaction" onclick="App.viewRawRequest();" crop="end"/>
+         </hbox>
+         <!--<separator orient="horizontal" class="groove"/>-->
+         <vbox minheight="100px" flex="3">
+           <textbox id="response-content" multiline="true" flex="3"/>
+           <iframe id="browserIframe" type="content" flex="1" />
+         </vbox>
+       </vbox>
 
-                  <checkbox id="prettyPrint" label="Pretty format"
-                            autocheck="false" oncommand="App.togglePrettyPrint();" />
-                 <label align="end"  class="small-margin, text-link" value="View raw transaction" onclick="App.viewRawRequest();" crop="end"/>
-              </hbox>
-              <!--<separator orient="horizontal" class="groove"/>-->
-              <vbox minheight="100px" flex="3">
-                  <textbox id="response-content" multiline="true" flex="3"/>
-                  <iframe id="browserIframe" type="content" flex="1" />
-              </vbox>
-            </vbox>
-
-            <!-- draggable splitter between response content and
-
-
-
-            headers section -->
-            <splitter resizeAfter="flex">
-            </splitter>
-
-            <vbox style="overflow: auto">
-                <caption label="Headers"/>
-	         <grid flex="1">
-	            <columns>
-	               <column/>
-	               <column flex="1"/>
-	            </columns>
-	            <rows id="headers"/>
-	         </grid>
-	      </vbox>
-	   </vbox>
-   </groupbox>
+       <vbox style="overflow: auto">
+         <caption label="Headers"/>
+         <grid flex="1">
+           <columns>
+             <column/>
+             <column flex="1"/>
+           </columns>
+           <rows id="headers"/>
+         </grid>
+       </vbox>
+     </tabpanels>
+   </tabbox>
   
    </hbox>
    <!-- draggable splitter between request/response and History -->
