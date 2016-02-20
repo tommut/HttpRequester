@@ -247,7 +247,7 @@
   
    </hbox>
    <!-- draggable splitter between request/response and History -->
-   <splitter resizeAfter="flex">
+   <splitter resizeAfter="flex" height="3">
    </splitter>
     <!-- list of requests --> 
 	<vbox style="overflow: auto">
