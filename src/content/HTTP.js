@@ -134,11 +134,10 @@ function HTTP(method,url,options)
          requester.setRequestHeader(name,options.headers[name]);
       }
    }
-   if (options.contentType != null && options.contentType.length > 0) {
+   if (options.body || (options.contentType != null && options.contentType.length > 0)) {
 	  requester.setRequestHeader("Content-Type",options.contentType);
    }
    if (options.body) {
-      requester.setRequestHeader("Content-Type",options.contentType);
       requester.send(options.body);
    } else {
       requester.send(null);
